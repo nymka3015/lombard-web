@@ -146,15 +146,12 @@
                                     <span class="text-black font-black">${loan.totalInterest.toLocaleString()}₮</span>
                                 </div>
                     
-                                <!-- ТӨЛӨХ ДҮН: Илүү тод хар блок -->
-                                <div class="bg-black text-white p-4 rounded-xl mt-5 shadow-lg">
-                                    <p class="text-[9px] uppercase font-black mb-1 opacity-60">Төлөх дүн</p>
-                                    <div class="flex justify-between items-end">
-                                        <h3 class="text-2xl font-black text-[#FCF6BA] tracking-tighter">
-                                            ${(loan.amount + loan.totalInterest).toLocaleString()}₮
-                                        </h3>
-                                        <span class="text-[10px] opacity-40 mb-1">ӨГӨӨЖ ЛОМБАРД</span>
-                                    </div>
+                                <!-- ТӨЛӨХ ДҮН: Голлуулсан хар блок -->
+                                <div class="bg-black text-white p-5 rounded-xl mt-5 shadow-lg text-center">
+                                    <p class="text-[10px] uppercase font-black mb-1 opacity-50 tracking-widest">Төлөх дүн</p>
+                                    <h3 class="text-3xl font-black text-[#FCF6BA] tracking-tighter">
+                                        ${(loan.amount + loan.totalInterest).toLocaleString()}₮
+                                    </h3>
                                 </div>
                             </div>
                         </div>
