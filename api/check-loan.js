@@ -85,8 +85,8 @@ export default async function handler(req, res) {
                 const extraDays = diffDays - 30;
                 penalty = Math.round((remainingAmount * 0.0014) * extraDays * 0.2);
             }
-
             return {
+                nd: parts[0], // Төрөл нэмэв (N эсвэл D)
                 no, name, amount: remainingAmount, date: putDate, lastPayment: latestExtDate,
                 days: diffDays, interest, penalty, totalInterest: interest + penalty
             };
