@@ -89,13 +89,19 @@
             document.getElementById('login-form').classList.add('hidden');
             resultSection.classList.remove('hidden');
             
-            // Олон зээлийг зурах хэсэг
-            resultSection.innerHTML = data.loans.map(loan => `
-                <div class="mb-8 p-4 border-2 border-blue-50 rounded-2xl bg-white shadow-sm">
+            // 1. Бүх зээлийн нийт төлөх дүнг тооцоолох
+            let grandTotal = 0;
+            data.loans.forEach(loan => {
+                grandTotal += (loan.amount + loan.totalInterest);
+            });
+
+            // 2. Зээл бүрийн картыг үүсгэх
+            let loansHtml = data.loans.map(loan => `
+                <div class="mb-4 p-5 border-2 border-blue-50 rounded-2xl bg-white shadow-sm">
                     <div class="flex justify-between items-start mb-4">
                         <div>
                             <h2 class="text-lg font-bold text-blue-900">${loan.name}</h2>
-                            <p class="text-xs text-gray-400 font-mono">№: ${loan.no}</p>
+                            <p class="text-xs text-gray-400 font-mono uppercase">№: ${loan.no}</p>
                         </div>
                         <span class="bg-green-100 text-green-700 text-[10px] font-black px-2 py-1 rounded">ИДЭВХТЭЙ</span>
                     </div>
@@ -104,15 +110,30 @@
                         <div class="flex justify-between"><span class="text-gray-400">Үндсэн үлдэгдэл:</span><span class="font-bold">${loan.amount.toLocaleString()}₮</span></div>
                         <div class="flex justify-between"><span class="text-gray-400">Сүүлд төлсөн:</span><span class="font-bold text-blue-600">${loan.lastPayment}</span></div>
                         <div class="flex justify-between"><span class="text-gray-400">Хугацаа:</span><span class="font-bold">${loan.days} хоног</span></div>
-                        <div class="flex justify-between border-t pt-2"><span class="text-gray-400">Бодогдсон хүү:</span><span class="font-bold">${loan.interest.toLocaleString()}₮</span></div>
-                        <div class="flex justify-between"><span class="text-gray-400">Торгууль:</span><span class="font-bold text-red-500">${loan.penalty.toLocaleString()}₮</span></div>
-                        <div class="bg-blue-900 text-white p-4 rounded-xl mt-4">
-                            <p class="text-[9px] uppercase opacity-60 mb-1">Нийт төлөх дүн</p>
-                            <h3 class="text-2xl font-black">${(loan.amount + loan.totalInterest).toLocaleString()}₮</h3>
+                        <div class="flex justify-between border-t pt-2"><span class="text-gray-400">Хүү:</span><span class="font-bold text-red-600">${loan.totalInterest.toLocaleString()}₮</span></div>
+                        
+                        <div class="bg-slate-100 text-blue-900 p-4 rounded-xl mt-4">
+                            <p class="text-[9px] uppercase font-bold opacity-60 mb-1">Нийт төлөх дүн</p>
+                            <h3 class="text-xl font-black">${(loan.amount + loan.totalInterest).toLocaleString()}₮</h3>
                         </div>
                     </div>
                 </div>
-            `).join('') + '<button onclick="location.reload()" class="w-full text-gray-400 text-xs font-bold uppercase py-4">Гарах</button>';
+            `).join('');
+
+            // 3. Хэрэв 1-ээс олон зээлтэй бол НИЙТ дүн харуулах
+            let summaryHtml = "";
+            if (data.loans.length > 1) {
+                summaryHtml = `
+                    <div class="mt-6 p-6 bg-blue-900 text-white rounded-3xl shadow-xl border-4 border-blue-800">
+                        <p class="text-[10px] uppercase font-bold text-blue-300 mb-1 tracking-widest text-center">Бүх зээлийн нийт төлбөр</p>
+                        <h3 class="text-3xl font-black text-center">${grandTotal.toLocaleString()}₮</h3>
+                    </div>
+                `;
+            }
+
+            // Бүгдийг нэгтгэж харуулах
+            resultSection.innerHTML = loansHtml + summaryHtml + 
+                '<button onclick="location.reload()" class="w-full text-gray-400 text-[10px] font-black uppercase py-8 tracking-widest">Системээс гарах</button>';
             
         } else {
             error.innerText = data.message;
@@ -125,7 +146,7 @@
         btn.disabled = false;
         btn.innerText = "ХАРАХ";
     }
-}
+    }
     </script>
 </body>
 </html>
