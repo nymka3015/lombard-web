@@ -38,11 +38,12 @@ export default async function handler(req, res) {
 
         if (myLoans.length === 0) return res.status(404).json({ success: false, message: "Идэвхтэй зээл олдсонгүй." });
 
+        // ... (өмнөх cleanNum болон бусад хэсэг хэвээрээ)
+
         const resultLoans = myLoans.map(loanLine => {
             const parts = loanLine.split('|').map(p => p.trim());
             const nd = parts[0].toUpperCase();
             const no = parts[1].toUpperCase();
-            const name = parts[2]; // Нэрийг зөвхөн харуулахад ашиглана
             const originalAmount = cleanNum(parts[4]);
             const putDate = parts[8];
             const configExtDate = parts[16];
@@ -50,56 +51,48 @@ export default async function handler(req, res) {
             let totalDiscount = 0;
             let latestPaymentDate = (configExtDate && configExtDate !== "") ? configExtDate : putDate;
 
-            // СУНГАЛТЫН ФАЙЛААС ШҮҮХ (Нэрийг алгасаж, зөвхөн Төрөл болон №-ийг тулгана)
             servicesLines.forEach(sLine => {
                 const sParts = sLine.split('|').map(p => p.trim());
                 if (sParts.length >= 10) {
-                    const sND = sParts[0].toUpperCase();
-                    const sNo = sParts[1].toUpperCase();
-                    const sDate = sParts[3];
-                    const sHasalt = cleanNum(sParts[9]);
-
-                    // Зөвхөн Төрөл (N/D) болон Гэрээний дугаар (№) таарч байвал
-                    if (sND === nd && sNo === no) {
-                        totalDiscount += sHasalt;
-                        if (sDate > latestPaymentDate) {
-                            latestPaymentDate = sDate;
-                        }
+                    if (sParts[0].toUpperCase() === nd && sParts[1].toUpperCase() === no) {
+                        totalDiscount += cleanNum(sParts[9]);
+                        if (sParts[3] > latestPaymentDate) latestPaymentDate = sParts[3];
                     }
                 }
             });
 
             const remainingAmount = originalAmount - totalDiscount;
-
-            const today = new Date();
-            today.setHours(0, 0, 0, 0);
-            const start = new Date(latestPaymentDate);
-            start.setHours(0, 0, 0, 0);
+            const today = new Date(); today.setHours(0,0,0,0);
+            const start = new Date(latestPaymentDate); start.setHours(0,0,0,0);
             
             const diffTime = today - start;
             const diffDays = Math.max(0, Math.floor(diffTime / (1000 * 60 * 60 * 24)));
 
+            // ХОНОГИЙГ САЛГАХ ЛОГИК
+            const normalDays = Math.min(30, diffDays);
+            const overdueDays = Math.max(0, diffDays - 30);
+
             const interest = Math.round(remainingAmount * 0.0014 * diffDays);
             let penalty = 0;
             if (diffDays > 30) {
-                const extraDays = diffDays - 30;
-                penalty = Math.round((remainingAmount * 0.0014) * extraDays * 0.2);
+                penalty = Math.round((remainingAmount * 0.0014) * overdueDays * 0.2);
             }
 
             const redHvv = cleanNum(parts[18]);
             const finalInterest = (redHvv > 0) ? redHvv : (interest + penalty);
 
             return {
-                nd: parts[0],
-                no: parts[1],
-                name: parts[2],
+                nd, no, name: parts[2],
                 amount: remainingAmount,
                 date: putDate,
                 lastPayment: latestPaymentDate,
                 days: diffDays,
+                normalDays: normalDays,      // 30 хүртэлх хоног
+                overdueDays: overdueDays,    // Хэтэрсэн хоног
                 totalInterest: finalInterest
             };
         });
+// ...
 
         return res.status(200).json({ success: true, loans: resultLoans });
 
