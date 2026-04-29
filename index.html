@@ -27,7 +27,10 @@
                     <label class="text-xs font-bold text-gray-500 uppercase">Нууц код (4 оронтой)</label>
                     <input id="pin" type="password" maxlength="4" class="w-full p-3 border-2 border-gray-100 rounded-xl focus:border-blue-500 outline-none transition" placeholder="****">
                 </div>
-                <button onclick="handleLogin()" id="login-btn" class="w-full bg-blue-600 text-white py-4 rounded-xl font-bold uppercase tracking-wider hover:bg-blue-700 transition active:scale-95">Харах</button>
+                <button onclick="handleLogin()" id="login-btn" class="w-full bg-blue-600 text-white py-4 rounded-xl font-bold uppercase tracking-wider hover:bg-blue-700 transition active:scale-95">Нэвтрэх</button>
+                <button id="install-btn" class="hidden w-full mt-4 bg-emerald-500 text-white py-3 rounded-xl font-bold uppercase text-[10px] tracking-widest shadow-md active:scale-95 transition">
+                    Гар утсанд суулгах
+                </button>
                 <p id="error-msg" class="text-red-500 text-sm text-center font-bold hidden">Мэдээлэл олдсонгүй!</p>
             </div>
         </div>
