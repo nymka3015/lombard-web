@@ -93,11 +93,16 @@
                     resultSection.classList.remove('hidden');
 
                     let grandTotal = 0;
+                    let sumPrincipal = 0; // Нийт үндсэн зээл
+                    let sumInterest = 0;  // Нийт хүү
                     let sumN = 0, sumD = 0;
-
+                    
                     data.loans.forEach(loan => {
                         const loanTotal = (loan.amount + loan.totalInterest);
                         grandTotal += loanTotal;
+                        sumPrincipal += loan.amount;
+                        sumInterest += loan.totalInterest;
+                    
                         if (loan.nd === 'N') sumN += loanTotal;
                         if (loan.nd === 'D') sumD += loanTotal;
                     });
@@ -156,12 +161,26 @@
                     `).join('');
 
                     // НИЙТ ДҮН: Алтлаг дэвсгэр дээр Хар текст
-                    let summaryHtml = (data.loans.length > 1) ? `
-                        <div class="mb-8 p-6 gold-bg-block rounded-3xl text-center">
-                            <p class="text-[10px] uppercase font-black mb-1 opacity-70">БҮХ ЗЭЭЛИЙН НИЙТ ТӨЛБӨР</p>
-                            <h3 class="text-3xl font-black tracking-tighter">${grandTotal.toLocaleString()}₮</h3>
+                                    let summaryHtml = (data.loans.length > 1) ? `
+                    <div class="mb-8 p-6 gold-bg-block rounded-3xl shadow-2xl space-y-2">
+                        <p class="text-[10px] uppercase font-black mb-3 opacity-70 text-center border-b border-black/10 pb-2">БҮХ ЗЭЭЛИЙН НИЙТ ТӨЛБӨР</p>
+                        
+                        <div class="flex justify-between text-xs font-bold px-2">
+                            <span class="opacity-70">Нийт зээл:</span>
+                            <span>${sumPrincipal.toLocaleString()}₮</span>
                         </div>
-                    ` : "";
+                        
+                        <div class="flex justify-between text-xs font-bold px-2">
+                            <span class="opacity-70">Нийт хүү:</span>
+                            <span>${sumInterest.toLocaleString()}₮</span>
+                        </div>
+                        
+                        <div class="flex justify-between text-base font-black px-2 pt-2 border-t border-black/10 mt-2">
+                            <span>НИЙТ ТӨЛӨЛТ:</span>
+                            <span class="text-xl">${grandTotal.toLocaleString()}₮</span>
+                        </div>
+                    </div>
+                ` : "";
 
                     const bankData = (sumD >= sumN) ? { name: "Ц.Дамдинжав", iban: "79 000 500", acc: "53 0776 0208" } : { name: "Д.Нямжанцан", iban: "39 000 500", acc: "54 0330 6898" };
 
