@@ -68,7 +68,7 @@
     </div>
 
     <script>
-        async function handleLogin() {
+     async function handleLogin() {
     const phone = document.getElementById('phone').value;
     const pin = document.getElementById('pin').value;
     const btn = document.getElementById('login-btn');
@@ -88,14 +88,20 @@
         if (data.success) {
             document.getElementById('login-form').classList.add('hidden');
             resultSection.classList.remove('hidden');
-            
-            // 1. Бүх зээлийн нийт төлөх дүнг тооцоолох
+
+            // 1. Дүн тооцоолох болон Дансны сонголт хийх
             let grandTotal = 0;
+            let sumN = 0;
+            let sumD = 0;
+
             data.loans.forEach(loan => {
-                grandTotal += (loan.amount + loan.totalInterest);
+                const loanTotal = (loan.amount + loan.totalInterest);
+                grandTotal += loanTotal;
+                if (loan.nd === 'N') sumN += loanTotal;
+                if (loan.nd === 'D') sumD += loanTotal;
             });
 
-            // 2. Зээл бүрийн картыг үүсгэх
+            // 2. Зээл бүрийн карт
             let loansHtml = data.loans.map(loan => `
                 <div class="mb-4 p-5 border-2 border-blue-50 rounded-2xl bg-white shadow-sm">
                     <div class="flex justify-between items-start mb-4">
@@ -105,48 +111,72 @@
                         </div>
                         <span class="bg-green-100 text-green-700 text-[10px] font-black px-2 py-1 rounded">ИДЭВХТЭЙ</span>
                     </div>
-
                     <div class="space-y-2 text-sm">
                         <div class="flex justify-between"><span class="text-gray-400">Үндсэн үлдэгдэл:</span><span class="font-bold">${loan.amount.toLocaleString()}₮</span></div>
                         <div class="flex justify-between"><span class="text-gray-400">Сүүлд төлсөн:</span><span class="font-bold text-blue-600">${loan.lastPayment}</span></div>
                         <div class="flex justify-between"><span class="text-gray-400">Хугацаа:</span><span class="font-bold">${loan.days} хоног</span></div>
                         <div class="flex justify-between border-t pt-2"><span class="text-gray-400">Хүү:</span><span class="font-bold text-red-600">${loan.totalInterest.toLocaleString()}₮</span></div>
-                        
-                        <div class="bg-slate-100 text-blue-900 p-4 rounded-xl mt-4">
-                            <p class="text-[9px] uppercase font-bold opacity-60 mb-1">Нийт төлөх дүн</p>
+                        <div class="bg-slate-100 text-blue-900 p-4 rounded-xl mt-4 text-center">
+                            <p class="text-[9px] uppercase font-bold opacity-60 mb-1">Төлөх дүн</p>
                             <h3 class="text-xl font-black">${(loan.amount + loan.totalInterest).toLocaleString()}₮</h3>
                         </div>
                     </div>
                 </div>
             `).join('');
 
-            // 3. Хэрэв 1-ээс олон зээлтэй бол НИЙТ дүн харуулах
-            let summaryHtml = "";
-            if (data.loans.length > 1) {
-                summaryHtml = `
-                    <div class="mt-6 p-6 bg-blue-900 text-white rounded-3xl shadow-xl border-4 border-blue-800">
-                        <p class="text-[10px] uppercase font-bold text-blue-300 mb-1 tracking-widest text-center">Бүх зээлийн нийт төлбөр</p>
-                        <h3 class="text-3xl font-black text-center">${grandTotal.toLocaleString()}₮</h3>
-                    </div>
-                `;
-            }
+            // 3. Нийт дүн (Олон зээлтэй бол)
+            let summaryHtml = (data.loans.length > 1) ? `
+                <div class="mt-2 mb-6 p-5 bg-blue-900 text-white rounded-3xl shadow-lg border-4 border-blue-800">
+                    <p class="text-[10px] uppercase font-bold text-blue-300 mb-1 text-center">Бүх зээлийн нийт төлбөр</p>
+                    <h3 class="text-3xl font-black text-center">${grandTotal.toLocaleString()}₮</h3>
+                </div>
+            ` : "";
 
-            // Бүгдийг нэгтгэж харуулах
-            resultSection.innerHTML = loansHtml + summaryHtml + 
+            // 4. Банкны мэдээлэл сонгох (Аль их дүн дээр нь үндэслэнэ)
+            let bankHtml = "";
+            const bankData = (sumD >= sumN) ? {
+                name: "Ц.Дамдинжав", iban: "79 000 500", acc: "53 0776 0208"
+            } : {
+                name: "Д.Нямжанцан", iban: "39 000 500", acc: "54 0330 6898"
+            };
+
+            bankHtml = `
+                <div class="mt-6 p-5 bg-green-50 border-2 border-dashed border-green-200 rounded-2xl text-xs space-y-1">
+                    <p class="text-green-700 font-black uppercase text-center mb-2">💰 Шилжүүлэг хийх данс</p>
+                    <div class="flex justify-between border-b border-green-100 pb-1"><span>БАНК:</span><span class="font-bold text-gray-800">ХААН БАНК</span></div>
+                    <div class="flex justify-between border-b border-green-100 pb-1"><span>НЭР:</span><span class="font-bold text-gray-800">${bankData.name}</span></div>
+                    <div class="flex justify-between border-b border-green-100 pb-1"><span>IBAN:</span><span class="font-bold text-gray-800">${bankData.iban}</span></div>
+                    <div class="flex justify-between border-b border-green-100 pb-1"><span>ДАНС:</span><span class="font-bold text-blue-700 text-sm tracking-wider">${bankData.acc}</span></div>
+                    <p class="text-[10px] text-green-600 pt-2 text-center leading-tight font-medium">УТГА: Төлөх Гэрээний дугаараа (№) бичнэ үү</p>
+                </div>
+            `;
+
+            resultSection.innerHTML = loansHtml + summaryHtml + bankHtml + 
                 '<button onclick="location.reload()" class="w-full text-gray-400 text-[10px] font-black uppercase py-8 tracking-widest">Системээс гарах</button>';
             
         } else {
-            error.innerText = data.message;
-            error.classList.remove('hidden');
+            // Идэвхтэй зээлгүй үед
+            document.getElementById('login-form').classList.add('hidden');
+            resultSection.classList.remove('hidden');
+            resultSection.innerHTML = `
+                <div class="text-center py-10">
+                    <div class="bg-gray-100 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <svg class="w-10 h-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    </div>
+                    <h2 class="text-lg font-bold text-gray-800">Танд идэвхтэй зээл байхгүй байна.</h2>
+                    <p class="text-gray-400 text-sm mt-2">Баярлалаа.</p>
+                    <button onclick="location.reload()" class="mt-8 bg-blue-600 text-white px-8 py-3 rounded-xl font-bold uppercase text-xs">Буцах</button>
+                </div>
+            `;
         }
     } catch (e) {
-        error.innerText = "Алдаа гарлаа.";
+        error.innerText = "Сервертэй холбогдоход алдаа гарлаа.";
         error.classList.remove('hidden');
     } finally {
         btn.disabled = false;
         btn.innerText = "ХАРАХ";
     }
-    }
+}
     </script>
 </body>
 </html>
