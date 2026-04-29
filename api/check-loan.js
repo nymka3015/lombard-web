@@ -28,8 +28,21 @@ export default async function handler(req, res) {
 
         // Тухайн утасны дугаартай БҮХ идэвхтэй зээлийг шүүх
         const myLoans = configLines.filter(line => {
-            const parts = line.split('|');
-            return parts[3] === phone && parts[21] !== "Хаагдсан";
+        const parts = line.split('|').map(p => p.trim()); // Бүх зайг арилгах
+        
+        const phoneMatch = parts[3] === phone;
+        const status = parts[21] || "";
+        const closeDate = parts[17] || ""; // Авсан огноо
+        const sellDate = parts[19] || "";  // Зарсан огноо
+    
+        // ИДЭВХТЭЙ БАЙХ НӨХЦӨЛ:
+        // 1. Утас таарах
+        // 2. Төлөв нь "Хаагдсан" биш байх
+        // 3. Авсан огноо (Index 17) хоосон байх
+        // 4. Зарсан огноо (Index 19) хоосон байх
+        const isActive = status !== "Хаагдсан" && closeDate === "" && sellDate === "";
+    
+        return phoneMatch && isActive;
         });
 
         if (myLoans.length === 0) return res.status(404).json({ success: false, message: "Идэвхтэй зээл олдсонгүй." });
