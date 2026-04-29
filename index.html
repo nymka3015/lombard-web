@@ -107,7 +107,7 @@
                     <div class="flex justify-between items-start mb-4">
                         <div>
                             <h2 class="text-lg font-bold text-blue-900">${loan.name}</h2>
-                            <p class="text-xs text-gray-400 font-mono uppercase">№: ${loan.no}</p>
+                            <p class="text-xs text-gray-400 font-mono uppercase">Гэрийн №: ${loan.no}</p>
                         </div>
                         <span class="bg-green-100 text-green-700 text-[10px] font-black px-2 py-1 rounded">ИДЭВХТЭЙ</span>
                     </div>
@@ -140,14 +140,14 @@
                 name: "Д.Нямжанцан", iban: "39 000 500", acc: "54 0330 6898"
             };
 
-            bankHtml = `
+             bankHtml = `
                 <div class="mt-6 p-5 bg-green-50 border-2 border-dashed border-green-200 rounded-2xl text-xs space-y-1">
                     <p class="text-green-700 font-black uppercase text-center mb-2">💰 Шилжүүлэг хийх данс</p>
                     <div class="flex justify-between border-b border-green-100 pb-1"><span>БАНК:</span><span class="font-bold text-gray-800">ХААН БАНК</span></div>
                     <div class="flex justify-between border-b border-green-100 pb-1"><span>НЭР:</span><span class="font-bold text-gray-800">${bankData.name}</span></div>
                     <div class="flex justify-between border-b border-green-100 pb-1"><span>IBAN:</span><span class="font-bold text-gray-800">${bankData.iban}</span></div>
                     <div class="flex justify-between border-b border-green-100 pb-1"><span>ДАНС:</span><span class="font-bold text-blue-700 text-sm tracking-wider">${bankData.acc}</span></div>
-                    <p class="text-[10px] text-green-600 pt-2 text-center leading-tight font-medium">УТГА: Төлөх Гэрээний дугаараа (№) бичнэ үү</p>
+                    <p class="text-[10px] text-green-600 pt-2 text-center leading-tight font-medium uppercase">УТГА: Гэрээний дугаараа (№) бичнэ үү</p>
                 </div>
             `;
 
