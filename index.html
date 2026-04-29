@@ -114,7 +114,18 @@
                     <div class="space-y-2 text-sm">
                         <div class="flex justify-between"><span class="text-gray-400">Үндсэн үлдэгдэл:</span><span class="font-bold">${loan.amount.toLocaleString()}₮</span></div>
                         <div class="flex justify-between"><span class="text-gray-400">Сүүлд төлсөн:</span><span class="font-bold text-blue-600">${loan.lastPayment}</span></div>
-                        <div class="flex justify-between"><span class="text-gray-400">Хугацаа:</span><span class="font-bold">${loan.days} хоног</span></div>
+                        
+                        <!-- Хэвийн хоног -->
+                        <div class="flex justify-between"><span class="text-gray-400">Хугацаа:</span><span class="font-bold">${loan.normalDays} хоног</span></div>
+                        
+                        <!-- Хэрэв хугацаа хэтэрсэн бол харуулна -->
+                        ${loan.overdueDays > 0 ? `
+                        <div class="flex justify-between text-red-600 font-bold italic">
+                            <span>Хугацаа хэтэрсэн:</span>
+                            <span>${loan.overdueDays} хоног</span>
+                        </div>
+                        ` : ''}
+
                         <div class="flex justify-between border-t pt-2"><span class="text-gray-400">Хүү:</span><span class="font-bold text-red-600">${loan.totalInterest.toLocaleString()}₮</span></div>
                         <div class="bg-slate-100 text-blue-900 p-4 rounded-xl mt-4 text-center">
                             <p class="text-[9px] uppercase font-bold opacity-60 mb-1">Төлөх дүн</p>
