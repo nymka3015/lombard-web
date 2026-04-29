@@ -239,6 +239,39 @@ async function copyToClipboard(text, btnElement) {
         console.error('Хуулж чадсангүй: ', err);
     }
 }
+        let deferredPrompt;
+const installBtn = document.getElementById('install-btn');
+
+// 1. Service Worker бүртгэх
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/sw.js');
+}
+
+// 2. Суулгах боломжтой үед товчийг харуулах
+window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    installBtn.classList.remove('hidden'); // Товчийг харуулна
+});
+
+// 3. Товчлуур дээр дарахад суулгах цонх гаргах
+installBtn.addEventListener('click', async () => {
+    if (deferredPrompt) {
+        deferredPrompt.prompt();
+        const { outcome } = await deferredPrompt.userChoice;
+        if (outcome === 'accepted') {
+            console.log('User accepted the install prompt');
+            installBtn.classList.add('hidden');
+        }
+        deferredPrompt = null;
+    }
+});
+
+// 4. Хэрэв аль хэдийн суулгасан бол товчийг нуух
+window.addEventListener('appinstalled', () => {
+    installBtn.classList.add('hidden');
+    deferredPrompt = null;
+});
     </script>
 </body>
 </html>
