@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="mn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ломбард - Миний тооцоо</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-100 flex items-center justify-center min-h-screen p-4">
+    <div id="app" class="w-full max-w-md bg-white rounded-2xl shadow-xl p-6">
+        <!-- Login Form -->
+        <div id="login-form">
+            <h1 class="text-2xl font-black text-center text-blue-900 mb-6 uppercase">Миний Тооцоо</h1>
+            <div class="space-y-4">
+                <div>
+                    <label class="text-xs font-bold text-gray-500 uppercase">Утасны дугаар</label>
+                    <input id="phone" type="tel" class="w-full p-3 border-2 border-gray-100 rounded-xl focus:border-blue-500 outline-none transition" placeholder="99112233">
+                </div>
+                <div>
+                    <label class="text-xs font-bold text-gray-500 uppercase">Нууц код (4 оронтой)</label>
+                    <input id="pin" type="password" maxlength="4" class="w-full p-3 border-2 border-gray-100 rounded-xl focus:border-blue-500 outline-none transition" placeholder="****">
+                </div>
+                <button onclick="handleLogin()" id="login-btn" class="w-full bg-blue-600 text-white py-4 rounded-xl font-bold uppercase tracking-wider hover:bg-blue-700 transition active:scale-95">Харах</button>
+                <p id="error-msg" class="text-red-500 text-sm text-center font-bold hidden">Мэдээлэл олдсонгүй!</p>
+            </div>
+        </div>
+
+        <!-- Result Section (Initially Hidden) -->
+        <div id="result-section" class="hidden">
+            <div class="flex justify-between items-start mb-6">
+                <div>
+                    <h2 id="res-name" class="text-xl font-bold text-blue-900">Нэр</h2>
+                    <p id="res-no" class="text-sm text-gray-500">№: 001</p>
+                </div>
+                <span class="bg-green-100 text-green-700 text-[10px] font-black px-2 py-1 rounded">ИДЭВХТЭЙ</span>
+            </div>
+
+            <div class="space-y-3 bg-gray-50 p-4 rounded-xl">
+                <div class="flex justify-between text-sm">
+                    <span class="text-gray-500">Үндсэн мөнгө:</span>
+                    <span id="res-amount" class="font-bold">0₮</span>
+                </div>
+                <div class="flex justify-between text-sm">
+                    <span class="text-gray-500">Тавьсан огноо:</span>
+                    <span id="res-date" class="font-bold">2024-01-01</span>
+                </div>
+                <div class="flex justify-between text-sm">
+                    <span class="text-gray-500">Хугацаа:</span>
+                    <span id="res-days" class="font-bold">0 хоног</span>
+                </div>
+                <div class="flex justify-between text-sm border-t pt-2">
+                    <span class="text-gray-500">Бодогдсон хүү:</span>
+                    <span id="res-hvv" class="font-bold text-red-500">0₮</span>
+                </div>
+                <div class="flex justify-between text-sm">
+                    <span class="text-gray-500">Торгууль (20%):</span>
+                    <span id="res-penalty" class="font-bold text-red-600">0₮</span>
+                </div>
+            </div>
+
+            <div class="mt-6 bg-blue-900 text-white p-5 rounded-2xl shadow-lg shadow-blue-200">
+                <p class="text-[10px] uppercase font-bold text-blue-300 mb-1">Нийт төлөх дүн</p>
+                <h3 id="res-total" class="text-3xl font-black">0₮</h3>
+            </div>
+
+            <button onclick="location.reload()" class="w-full mt-6 text-gray-400 text-xs font-bold uppercase tracking-widest">Гарах</button>
+        </div>
+    </div>
+
+    <script>
+        async function handleLogin() {
+            const phone = document.getElementById('phone').value;
+            const pin = document.getElementById('pin').value;
+            const btn = document.getElementById('login-btn');
+            const error = document.getElementById('error-msg');
+
+            if(!phone || !pin) return;
+
+            btn.disabled = true;
+            btn.innerText = "УНШИЖ БАЙНА...";
+            error.classList.add('hidden');
+
+            try {
+                // Энэ хэсэгт бид Vercel-ийн API руу хандана
+                const response = await fetch(`/api/check-loan?phone=${phone}&pin=${pin}`);
+                const data = await response.json();
+
+                if (data.success) {
+                    document.getElementById('login-form').classList.add('hidden');
+                    document.getElementById('result-section').classList.remove('hidden');
+                    
+                    document.getElementById('res-name').innerText = data.loan.name;
+                    document.getElementById('res-no').innerText = "№: " + data.loan.no;
+                    document.getElementById('res-amount').innerText = data.loan.amount.toLocaleString() + "₮";
+                    document.getElementById('res-date').innerText = data.loan.date;
+                    document.getElementById('res-days').innerText = data.loan.days + " хоног";
+                    document.getElementById('res-hvv').innerText = data.loan.interest.toLocaleString() + "₮";
+                    document.getElementById('res-penalty').innerText = data.loan.penalty.toLocaleString() + "₮";
+                    document.getElementById('res-total').innerText = (data.loan.amount + data.loan.totalInterest).toLocaleString() + "₮";
+                } else {
+                    error.innerText = data.message || "Мэдээлэл буруу байна!";
+                    error.classList.remove('hidden');
+                }
+            } catch (e) {
+                error.innerText = "Сервертэй холбогдоход алдаа гарлаа.";
+                error.classList.remove('hidden');
+            } finally {
+                btn.disabled = false;
+                btn.innerText = "ХАРАХ";
+            }
+        }
+    </script>
+</body>
+</html>
