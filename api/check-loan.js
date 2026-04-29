@@ -7,14 +7,17 @@ export default async function handler(req, res) {
 
     const getGDriveUrl = (id) => `https://docs.google.com/uc?export=download&id=${id}`;
 
-    // Тоог цэвэрлэж унших туслах функц (₮ болон таслалыг арилгана)
+    // Тоог цэвэрлэж унших функц (₮, таслал, сул зайг арилгана)
     const cleanNum = (val) => {
         if (!val) return 0;
+        // Зөвхөн тоо, хасах тэмдэг, цэгийг үлдээнэ
         const cleaned = val.toString().replace(/[^0-9.-]/g, '');
-        return parseFloat(cleaned) || 0;
+        const num = parseFloat(cleaned);
+        return isNaN(num) ? 0 : num;
     };
 
     try {
+        // 1. Хэрэглэгч шалгах
         const usersRes = await fetch(getGDriveUrl(USERS_FILE_ID));
         const usersText = await usersRes.text();
         const isValidUser = usersText.split('\n').some(line => {
@@ -24,6 +27,7 @@ export default async function handler(req, res) {
 
         if (!isValidUser) return res.status(401).json({ success: false, message: "Нууц код буруу!" });
 
+        // 2. Файлуудыг зэрэг татаж авах
         const [configRes, servicesRes] = await Promise.all([
             fetch(getGDriveUrl(CONFIG_FILE_ID)),
             fetch(getGDriveUrl(SERVICES_FILE_ID))
@@ -32,42 +36,53 @@ export default async function handler(req, res) {
         const configLines = (await configRes.text()).split('\n').filter(l => l.trim());
         const servicesLines = (await servicesRes.text()).split('\n').filter(l => l.trim());
 
+        // 3. Идэвхтэй зээлүүдийг шүүх
         const myLoans = configLines.filter(line => {
             const parts = line.split('|').map(p => p.trim());
-            return parts[3] === phone && parts[21] !== "Хаагдсан" && parts[17] === "" && parts[19] === "";
+            const phoneMatch = parts[3] === phone;
+            const isNotClosed = parts[21] !== "Хаагдсан" && parts[17] === "" && parts[19] === "";
+            return phoneMatch && isNotClosed;
         });
 
         if (myLoans.length === 0) return res.status(404).json({ success: false, message: "Идэвхтэй зээл олдсонгүй." });
 
         const resultLoans = myLoans.map(loanLine => {
             const parts = loanLine.split('|').map(p => p.trim());
-            const nd = parts[0];
-            const no = parts[1];
-            const name = parts[2];
+            const nd = parts[0].toUpperCase();
+            const no = parts[1].toUpperCase();
+            const name = parts[2].toLowerCase();
             const originalAmount = cleanNum(parts[4]);
             const putDate = parts[8];
-            const configExtDate = parts[16];
+            const configExtDate = parts[16]; // system_config дээрх сунгалтын огноо
 
             let totalDiscount = 0;
             let latestPaymentDate = (configExtDate && configExtDate !== "") ? configExtDate : putDate;
 
-            // СУНГАЛТ болон ХАСАЛТЫГ тооцох
+            // 4. Сунгалтын файл доторх БҮХ хасалт болон хамгийн сүүлийн огноог олох
             servicesLines.forEach(sLine => {
                 const sParts = sLine.split('|').map(p => p.trim());
-                if (sParts[0] === nd && sParts[1] === no && sParts[2] === name) {
-                    // Сунгалтын файл дахь Index 9-ийг цэвэрлэж авна
-                    totalDiscount += cleanNum(sParts[9]);
-                    
-                    // Хамгийн сүүлийн огноог шинэчлэх
-                    if (sParts[3] > latestPaymentDate) {
-                        latestPaymentDate = sParts[3];
+                if (sParts.length >= 10) {
+                    const sND = sParts[0].toUpperCase();
+                    const sNo = sParts[1].toUpperCase();
+                    const sName = sParts[2].toLowerCase();
+                    const sDate = sParts[3];
+                    const sDiscount = cleanNum(sParts[9]); // Index 9: Хасалт
+
+                    // Төрөл, Дугаар, Нэр гурвуулаа таарч байвал хасалтыг нэмнэ
+                    if (sND === nd && sNo === no && sName === name) {
+                        totalDiscount += sDiscount;
+                        // Хамгийн сүүлийн сунгалтын огноог шинэчлэх
+                        if (sDate > latestPaymentDate) {
+                            latestPaymentDate = sDate;
+                        }
                     }
                 }
             });
 
+            // 5. Үлдэгдэл мөнгө бодох
             const remainingAmount = originalAmount - totalDiscount;
-            
-            // Огноо бодох
+
+            // 6. Хоног болон Хүү тооцох
             const today = new Date();
             today.setHours(0, 0, 0, 0);
             const start = new Date(latestPaymentDate);
@@ -76,10 +91,7 @@ export default async function handler(req, res) {
             const diffTime = today - start;
             const diffDays = Math.max(0, Math.floor(diffTime / (1000 * 60 * 60 * 24)));
 
-            // Хүү бодох (0.14%)
             const interest = Math.round(remainingAmount * 0.0014 * diffDays);
-            
-            // Торгууль (30 хоногоос хэтэрвэл)
             let penalty = 0;
             if (diffDays > 30) {
                 const extraDays = diffDays - 30;
@@ -90,11 +102,13 @@ export default async function handler(req, res) {
             const totalInterest = (redHvv > 0) ? redHvv : (interest + penalty);
 
             return {
-                nd, no, name, 
-                amount: remainingAmount, 
-                date: putDate, 
+                nd: parts[0],
+                no: parts[1],
+                name: parts[2],
+                amount: remainingAmount, // Хасагдсан үлдэгдэл
+                date: putDate,
                 lastPayment: latestPaymentDate,
-                days: diffDays, 
+                days: diffDays,
                 totalInterest: totalInterest
             };
         });
@@ -102,6 +116,7 @@ export default async function handler(req, res) {
         return res.status(200).json({ success: true, loans: resultLoans });
 
     } catch (error) {
+        console.error("API Error:", error);
         return res.status(500).json({ success: false, message: "Алдаа: " + error.message });
     }
 }
