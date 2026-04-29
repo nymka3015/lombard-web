@@ -1,96 +1,87 @@
 export default async function handler(req, res) {
     const { phone, pin } = req.query;
 
-    // --- ЭНД ӨӨРИЙН GOOGLE DRIVE FILE ID-НУУДАА ОРУУЛААРАЙ ---
-    const USERS_FILE_ID = '1XgS_6oukQvuoG1gL7w5OxTrNlxXbg11w';
-    const CONFIG_FILE_ID = '1hcS_8-8qDv5w_-4wPG0RGk0IZH8mlijw';
-    const SERVICES_FILE_ID = '10qCz9BvefhEvzXQsqarkFTgIG7YWy82m';
+    // --- ӨӨРИЙН ID-НУУДАА ЭНД СОЛЬЖ ТАВИАРАЙ ---
+    const USERS_FILE_ID = '1_ЭНД_USERS_ФАЙЛЫН_ID_ОРУУЛ';
+    const CONFIG_FILE_ID = '1_ЭНД_SYSTEM_CONFIG_ФАЙЛЫН_ID_ОРУУЛ';
+    const SERVICES_FILE_ID = '1_ЭНД_APP_SERVICES_ФАЙЛЫН_ID_ОРУУЛ';
 
     const getGDriveUrl = (id) => `https://docs.google.com/uc?export=download&id=${id}`;
 
     try {
-        // 1. users.txt файлыг уншиж нэвтрэх эрх шалгах
         const usersRes = await fetch(getGDriveUrl(USERS_FILE_ID));
         const usersText = await usersRes.text();
-        const userLines = usersText.split('\n');
-        
-        const isValidUser = userLines.some(line => {
+        const isValidUser = usersText.split('\n').some(line => {
             const [uPhone, uPin] = line.trim().split('|');
             return uPhone === phone && uPin === pin;
         });
 
-        if (!isValidUser) {
-            return res.status(401).json({ success: false, message: "Утас эсвэл нууц код буруу!" });
-        }
+        if (!isValidUser) return res.status(401).json({ success: false, message: "Нууц код буруу!" });
 
-        // 2. system_config.dat (Зээлийн мэдээлэл) унших
-        const configRes = await fetch(getGDriveUrl(CONFIG_FILE_ID));
-        const configText = await configRes.text();
-        const configLines = configText.split('\n');
+        const [configRes, servicesRes] = await Promise.all([
+            fetch(getGDriveUrl(CONFIG_FILE_ID)),
+            fetch(getGDriveUrl(SERVICES_FILE_ID))
+        ]);
 
-        // 3. app_services.dat (Сунгалтын мэдээлэл) унших
-        const servicesRes = await fetch(getGDriveUrl(SERVICES_FILE_ID));
-        const servicesText = await servicesRes.text();
-        const servicesLines = servicesText.split('\n');
+        const configLines = (await configRes.text()).split('\n').filter(l => l.trim());
+        const servicesLines = (await servicesRes.text()).split('\n').filter(l => l.trim());
 
-        // 4. Тухайн хэрэглэгчийн зээлийг хайх (Утасны дугаараар)
-        const loanLine = configLines.find(line => {
+        // Тухайн утасны дугаартай БҮХ идэвхтэй зээлийг шүүх
+        const myLoans = configLines.filter(line => {
             const parts = line.split('|');
-            return parts[3] === phone; // Индекс 3 нь утасны дугаар
+            return parts[3] === phone && parts[21] !== "Хаагдсан";
         });
 
-        if (!loanLine) {
-            return res.status(404).json({ success: false, message: "Таны нэр дээр идэвхтэй зээл олдсонгүй." });
-        }
+        if (myLoans.length === 0) return res.status(404).json({ success: false, message: "Идэвхтэй зээл олдсонгүй." });
 
-        const parts = loanLine.split('|');
-        const amount = parseFloat(parts[4]) || 0;
-        const putDateStr = parts[8];
-        const extDateStr = parts[16]; // Сунгалтын огноо
+        const resultLoans = myLoans.map(loanLine => {
+            const parts = loanLine.split('|');
+            const nd = parts[0];
+            const no = parts[1];
+            const name = parts[2];
+            const originalAmount = parseFloat(parts[4].replace(/,/g, '')) || 0;
+            const putDate = parts[8];
 
-        // Сунгалтын тэмдэглэлээс хасалтуудыг (Discount) тооцох
-        let totalDiscount = 0;
-        servicesLines.forEach(line => {
-            const sParts = line.split('|');
-            if (sParts[0] === parts[0] && sParts[1] === parts[1] && sParts[2] === parts[2]) {
-                totalDiscount += parseFloat(sParts[9]) || 0; // Индекс 9 нь хасалт
+            // 1. Сунгалтын хамгийн сүүлийн огноо болон нийт хасалтыг олох
+            let latestExtDate = putDate;
+            let totalDiscount = 0;
+
+            servicesLines.forEach(sLine => {
+                const sParts = sLine.split('|');
+                // ND, No, Name гурвуулаа таарч байвал
+                if (sParts[0] === nd && sParts[1] === no && sParts[2] === name) {
+                    totalDiscount += parseFloat(sParts[9].replace(/,/g, '')) || 0;
+                    if (sParts[3] > latestExtDate) latestExtDate = sParts[3];
+                }
+            });
+
+            const remainingAmount = originalAmount - totalDiscount;
+            const today = new Date();
+            const start = new Date(latestExtDate);
+            
+            // Хоног тооцох
+            const diffTime = today - start;
+            const diffDays = Math.max(0, Math.floor(diffTime / (1000 * 60 * 60 * 24)));
+
+            // Хүү (0.14%)
+            const interest = Math.round(remainingAmount * 0.0014 * diffDays);
+            
+            // Торгууль (30 хоногоос хэтэрвэл 20%)
+            let penalty = 0;
+            if (diffDays > 30) {
+                const extraDays = diffDays - 30;
+                penalty = Math.round((remainingAmount * 0.0014) * extraDays * 0.2);
             }
+
+            return {
+                no, name, amount: remainingAmount, date: putDate, lastPayment: latestExtDate,
+                days: diffDays, interest, penalty, totalInterest: interest + penalty
+            };
         });
 
-        const remainingPrincipal = amount - totalDiscount;
-        const startDate = new Date(extDateStr || putDateStr);
-        const today = new Date();
-
-        const diffTime = Math.abs(today - startDate);
-        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
-        // Хүү тооцоолох (0.14%)
-        const interest = Math.round(remainingPrincipal * 0.0014 * diffDays);
-        
-        // Торгууль тооцоолох (30 хоногоос хэтэрвэл 20%)
-        let penalty = 0;
-        if (diffDays > 30) {
-            penalty = Math.round(interest * 0.2);
-        }
-
-        const totalInterest = (parseFloat(parts[18]) > 0) ? parseFloat(parts[18]) : (interest + penalty);
-
-        return res.status(200).json({
-            success: true,
-            loan: {
-                no: parts[1],
-                name: parts[2],
-                amount: remainingPrincipal,
-                date: putDateStr,
-                days: diffDays,
-                interest: interest,
-                penalty: penalty,
-                totalInterest: totalInterest
-            }
-        });
+        return res.status(200).json({ success: true, loans: resultLoans });
 
     } catch (error) {
-        console.error(error);
-        return res.status(500).json({ success: false, message: "Серверийн алдаа гарлаа." });
+        return res.status(500).json({ success: false, message: "Алдаа: " + error.message });
     }
 }
