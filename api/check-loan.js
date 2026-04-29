@@ -7,10 +7,9 @@ export default async function handler(req, res) {
 
     const getGDriveUrl = (id) => `https://docs.google.com/uc?export=download&id=${id}`;
 
-    // Тооноос бусад тэмдэгтийг арилгаж тоо болгох функц
     const cleanNum = (val) => {
         if (!val) return 0;
-        const cleaned = val.toString().replace(/[^0-9]/g, ''); // Зөвхөн тоог үлдээнэ
+        const cleaned = val.toString().replace(/[^0-9]/g, '');
         return parseFloat(cleaned) || 0;
     };
 
@@ -43,7 +42,7 @@ export default async function handler(req, res) {
             const parts = loanLine.split('|').map(p => p.trim());
             const nd = parts[0].toUpperCase();
             const no = parts[1].toUpperCase();
-            const name = parts[2].trim();
+            const name = parts[2]; // Нэрийг зөвхөн харуулахад ашиглана
             const originalAmount = cleanNum(parts[4]);
             const putDate = parts[8];
             const configExtDate = parts[16];
@@ -51,18 +50,17 @@ export default async function handler(req, res) {
             let totalDiscount = 0;
             let latestPaymentDate = (configExtDate && configExtDate !== "") ? configExtDate : putDate;
 
-            // Сунгалтын файлаас хасалт хайх (Strict Matching)
+            // СУНГАЛТЫН ФАЙЛААС ШҮҮХ (Нэрийг алгасаж, зөвхөн Төрөл болон №-ийг тулгана)
             servicesLines.forEach(sLine => {
                 const sParts = sLine.split('|').map(p => p.trim());
                 if (sParts.length >= 10) {
                     const sND = sParts[0].toUpperCase();
                     const sNo = sParts[1].toUpperCase();
-                    const sName = sParts[2].trim();
                     const sDate = sParts[3];
-                    const sHasalt = cleanNum(sParts[9]); // Index 9: Хасалт
+                    const sHasalt = cleanNum(sParts[9]);
 
-                    // Төрөл, Дугаар, Нэр таарч байвал
-                    if (sND === nd && sNo === no && sName === name) {
+                    // Зөвхөн Төрөл (N/D) болон Гэрээний дугаар (№) таарч байвал
+                    if (sND === nd && sNo === no) {
                         totalDiscount += sHasalt;
                         if (sDate > latestPaymentDate) {
                             latestPaymentDate = sDate;
@@ -71,7 +69,6 @@ export default async function handler(req, res) {
                 }
             });
 
-            // ҮЛДЭГДЭЛ МӨНГӨ = ҮНДСЭН МӨНГӨ - НИЙТ ХАСАЛТ
             const remainingAmount = originalAmount - totalDiscount;
 
             const today = new Date();
@@ -82,7 +79,6 @@ export default async function handler(req, res) {
             const diffTime = today - start;
             const diffDays = Math.max(0, Math.floor(diffTime / (1000 * 60 * 60 * 24)));
 
-            // Хүү бодох (0.14% хүүг ҮЛДЭГДЭЛ мөнгөнөөс бодно)
             const interest = Math.round(remainingAmount * 0.0014 * diffDays);
             let penalty = 0;
             if (diffDays > 30) {
