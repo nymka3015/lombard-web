@@ -104,43 +104,52 @@
 
                     // Зээлийн картууд
                     let loansHtml = data.loans.map(loan => `
-                        <div class="mb-6 p-6 card-bg rounded-2xl border-t border-white/5 relative overflow-hidden">
-                            <div class="flex justify-between items-start mb-6">
+                        <div class="mb-6 p-6 gold-bg-block rounded-2xl relative overflow-hidden">
+                            <!-- Зээлийн толгой хэсэг -->
+                            <div class="flex justify-between items-start mb-6 border-b border-black/10 pb-4">
                                 <div>
-                                    <h2 class="text-2xl font-black text-white uppercase fancy-font leading-none">${loan.name}</h2>
-                                    <p class="text-[10px] text-white-500 font-bold uppercase mt-1">Гэрийн №: ${loan.no}</p>
+                                    <h2 class="text-2xl font-black text-black uppercase fancy-font leading-none">${loan.name}</h2>
+                                    <p class="text-[10px] text-black/60 font-bold uppercase mt-1">Гэрийн №: ${loan.no}</p>
                                 </div>
-                                <span class="text-[9px] font-black px-2 py-1 border border-green-500/50 text-green-500 rounded uppercase">Идэвхтэй</span>
+                                <span class="text-[9px] font-black px-2 py-1 border border-black/20 text-black rounded uppercase">Идэвхтэй</span>
                             </div>
                             
-                            <div class="space-y-3 text-xs">
-                                <div class="flex justify-between border-b border-white/5 pb-2">
-                                    <span class="text-white-500">Зээлийн дүн:</span>
-                                    <span class="text-white font-bold">${loan.amount.toLocaleString()}₮</span>
+                            <!-- Зээлийн дэлгэрэнгүй мэдээлэл (Данс харагддаг шиг бүтэц) -->
+                            <div class="space-y-3 text-[11px] font-bold">
+                                <div class="flex justify-between border-b border-black/10 pb-2 text-black/70">
+                                    <span>ЗЭЭЛИЙН ДҮН:</span>
+                                    <span class="text-black font-black">${loan.amount.toLocaleString()}₮</span>
                                 </div>
-                                <div class="flex justify-between border-b border-white/5 pb-2">
-                                    <span class="text-white-500">Сүүлд төлсөн:</span>
-                                    <span class="text-white font-bold">${loan.lastPayment}</span>
+                                <div class="flex justify-between border-b border-black/10 pb-2 text-black/70">
+                                    <span>СҮҮЛД ТӨЛСӨН:</span>
+                                    <span class="text-black font-black">${loan.lastPayment}</span>
                                 </div>
-                                <div class="flex justify-between border-b border-white/5 pb-2">
-                                    <span class="text-white-500">Хугацаа:</span>
-                                    <span class="text-white font-bold">${loan.normalDays} хоног</span>
+                                <div class="flex justify-between border-b border-black/10 pb-2 text-black/70">
+                                    <span>ХУГАЦАА:</span>
+                                    <span class="text-black font-black">${loan.normalDays} хоног</span>
                                 </div>
+                                
                                 ${loan.overdueDays > 0 ? `
-                                <div class="flex justify-between text-red-500 font-bold">
-                                    <span>Хугацаа хэтэрсэн:</span>
-                                    <span>${loan.overdueDays} хоног</span>
+                                <div class="flex justify-between border-b border-black/10 pb-2 text-red-800">
+                                    <span>ХУГАЦАА ХЭТЭРСЭН:</span>
+                                    <span class="font-black">${loan.overdueDays} хоног</span>
                                 </div>
                                 ` : ''}
-                                <div class="flex justify-between pt-2">
-                                    <span class="text-white-500 font-bold">Хүү + Торгууль:</span>
-                                    <span class="text-[#D4AF37] font-bold">${loan.totalInterest.toLocaleString()}₮</span>
+                                
+                                <div class="flex justify-between border-b border-black/10 pb-2 text-black/70">
+                                    <span>ХҮҮ + ТОРГУУЛЬ:</span>
+                                    <span class="text-black font-black">${loan.totalInterest.toLocaleString()}₮</span>
                                 </div>
-
-                                <!-- ТӨЛӨХ ДҮН: Алтлаг дэвсгэр дээр Хар текст -->
-                                <div class="gold-bg-block p-4 rounded-xl mt-5">
-                                    <p class="text-[10px] uppercase font-black mb-1 opacity-70">Төлөх дүн</p>
-                                    <h3 class="text-2xl font-black tracking-tighter">${(loan.amount + loan.totalInterest).toLocaleString()}₮</h3>
+                    
+                                <!-- ТӨЛӨХ ДҮН: Илүү тод хар блок -->
+                                <div class="bg-black text-white p-4 rounded-xl mt-5 shadow-lg">
+                                    <p class="text-[9px] uppercase font-black mb-1 opacity-60">Төлөх дүн</p>
+                                    <div class="flex justify-between items-end">
+                                        <h3 class="text-2xl font-black text-[#FCF6BA] tracking-tighter">
+                                            ${(loan.amount + loan.totalInterest).toLocaleString()}₮
+                                        </h3>
+                                        <span class="text-[10px] opacity-40 mb-1">ӨГӨӨЖ ЛОМБАРД</span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
