@@ -1,10 +1,9 @@
 export default async function handler(req, res) {
     const { phone, pin } = req.query;
 
-    // --- ӨӨРИЙН ID-НУУДАА ЭНД СОЛЬЖ ТАВИАРАЙ ---
-    const USERS_FILE_ID = '1XgS_6oukQvuoG1gL7w5OxTrNlxXbg11w';
-    const CONFIG_FILE_ID = '1hcS_8-8qDv5w_-4wPG0RGk0IZH8mlijw';
-    const SERVICES_FILE_ID = '10qCz9BvefhEvzXQsqarkFTgIG7YWy82m';
+    const USERS_FILE_ID = '1_ЭНД_USERS_ФАЙЛЫН_ID_ОРУУЛ';
+    const CONFIG_FILE_ID = '1_ЭНД_SYSTEM_CONFIG_ФАЙЛЫН_ID_ОРУУЛ';
+    const SERVICES_FILE_ID = '1_ЭНД_APP_SERVICES_ФАЙЛЫН_ID_ОРУУЛ';
 
     const getGDriveUrl = (id) => `https://docs.google.com/uc?export=download&id=${id}`;
 
@@ -26,69 +25,66 @@ export default async function handler(req, res) {
         const configLines = (await configRes.text()).split('\n').filter(l => l.trim());
         const servicesLines = (await servicesRes.text()).split('\n').filter(l => l.trim());
 
-        // Тухайн утасны дугаартай БҮХ идэвхтэй зээлийг шүүх
         const myLoans = configLines.filter(line => {
-        const parts = line.split('|').map(p => p.trim()); // Бүх зайг арилгах
-        
-        const phoneMatch = parts[3] === phone;
-        const status = parts[21] || "";
-        const closeDate = parts[17] || ""; // Авсан огноо
-        const sellDate = parts[19] || "";  // Зарсан огноо
-    
-        // ИДЭВХТЭЙ БАЙХ НӨХЦӨЛ:
-        // 1. Утас таарах
-        // 2. Төлөв нь "Хаагдсан" биш байх
-        // 3. Авсан огноо (Index 17) хоосон байх
-        // 4. Зарсан огноо (Index 19) хоосон байх
-        const isActive = status !== "Хаагдсан" && closeDate === "" && sellDate === "";
-    
-        return phoneMatch && isActive;
+            const parts = line.split('|').map(p => p.trim());
+            return parts[3] === phone && parts[21] !== "Хаагдсан" && parts[17] === "" && parts[19] === "";
         });
 
         if (myLoans.length === 0) return res.status(404).json({ success: false, message: "Идэвхтэй зээл олдсонгүй." });
 
         const resultLoans = myLoans.map(loanLine => {
-            const parts = loanLine.split('|');
+            const parts = loanLine.split('|').map(p => p.trim());
             const nd = parts[0];
             const no = parts[1];
             const name = parts[2];
             const originalAmount = parseFloat(parts[4].replace(/,/g, '')) || 0;
             const putDate = parts[8];
+            const configExtDate = parts[16]; // system_config дээрх сунгалтын огноо
 
-            // 1. Сунгалтын хамгийн сүүлийн огноо болон нийт хасалтыг олох
-            let latestExtDate = putDate;
             let totalDiscount = 0;
+            let latestPaymentDate = configExtDate && configExtDate !== "" ? configExtDate : putDate;
 
+            // app_services.dat-аас тухайн зээлийн бүх хасалт болон хамгийн сүүлийн огноог олох
             servicesLines.forEach(sLine => {
-                const sParts = sLine.split('|');
-                // ND, No, Name гурвуулаа таарч байвал
+                const sParts = sLine.split('|').map(p => p.trim());
                 if (sParts[0] === nd && sParts[1] === no && sParts[2] === name) {
                     totalDiscount += parseFloat(sParts[9].replace(/,/g, '')) || 0;
-                    if (sParts[3] > latestExtDate) latestExtDate = sParts[3];
+                    if (sParts[3] > latestPaymentDate) {
+                        latestPaymentDate = sParts[3];
+                    }
                 }
             });
 
             const remainingAmount = originalAmount - totalDiscount;
             const today = new Date();
-            const start = new Date(latestExtDate);
+            today.setHours(0, 0, 0, 0); // Цагийг тэглэх
+            const start = new Date(latestPaymentDate);
+            start.setHours(0, 0, 0, 0);
             
-            // Хоног тооцох
             const diffTime = today - start;
             const diffDays = Math.max(0, Math.floor(diffTime / (1000 * 60 * 60 * 24)));
 
-            // Хүү (0.14%)
+            // Хүү бодох (0.14%) - Үлдэгдэл мөнгөнөөс
             const interest = Math.round(remainingAmount * 0.0014 * diffDays);
             
-            // Торгууль (30 хоногоос хэтэрвэл 20%)
+            // Торгууль бодох (30 хоногоос хэтэрвэл 20%)
             let penalty = 0;
             if (diffDays > 30) {
                 const extraDays = diffDays - 30;
                 penalty = Math.round((remainingAmount * 0.0014) * extraDays * 0.2);
             }
+
+            // Хэрэв үндсэн файл дээр "Хүү багасгасан" (redHvv - Index 18) байвал түүнийг авна
+            const redHvv = parseFloat(parts[18].replace(/,/g, '')) || 0;
+            const totalInterest = (redHvv > 0) ? redHvv : (interest + penalty);
+
             return {
-                nd: parts[0], // Төрөл нэмэв (N эсвэл D)
-                no, name, amount: remainingAmount, date: putDate, lastPayment: latestExtDate,
-                days: diffDays, interest, penalty, totalInterest: interest + penalty
+                nd, no, name, 
+                amount: remainingAmount, 
+                date: putDate, 
+                lastPayment: latestPaymentDate,
+                days: diffDays, 
+                totalInterest: totalInterest
             };
         });
 
