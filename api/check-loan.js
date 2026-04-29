@@ -1,9 +1,9 @@
 export default async function handler(req, res) {
     const { phone, pin } = req.query;
 
-    const USERS_FILE_ID = '1_ЭНД_USERS_ФАЙЛЫН_ID_ОРУУЛ';
-    const CONFIG_FILE_ID = '1_ЭНД_SYSTEM_CONFIG_ФАЙЛЫН_ID_ОРУУЛ';
-    const SERVICES_FILE_ID = '1_ЭНД_APP_SERVICES_ФАЙЛЫН_ID_ОРУУЛ';
+    const USERS_FILE_ID = '1XgS_6oukQvuoG1gL7w5OxTrNlxXbg11w';
+    const CONFIG_FILE_ID = '1hcS_8-8qDv5w_-4wPG0RGk0IZH8mlijw';
+    const SERVICES_FILE_ID = '10qCz9BvefhEvzXQsqarkFTgIG7YWy82m';
 
     const getGDriveUrl = (id) => `https://docs.google.com/uc?export=download&id=${id}`;
 
