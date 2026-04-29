@@ -141,12 +141,35 @@
             };
 
              bankHtml = `
-                <div class="mt-6 p-5 bg-green-50 border-2 border-dashed border-green-200 rounded-2xl text-xs space-y-1">
-                    <p class="text-green-700 font-black uppercase text-center mb-2">💰 Шилжүүлэг хийх данс</p>
-                    <div class="flex justify-between border-b border-green-100 pb-1"><span>БАНК:</span><span class="font-bold text-gray-800">ХААН БАНК</span></div>
-                    <div class="flex justify-between border-b border-green-100 pb-1"><span>НЭР:</span><span class="font-bold text-gray-800">${bankData.name}</span></div>
-                    <div class="flex justify-between border-b border-green-100 pb-1"><span>IBAN:</span><span class="font-bold text-gray-800">${bankData.iban}</span></div>
-                    <div class="flex justify-between border-b border-green-100 pb-1"><span>ДАНС:</span><span class="font-bold text-blue-700 text-sm tracking-wider">${bankData.acc}</span></div>
+                <div class="mt-6 p-5 bg-green-50 border-2 border-dashed border-green-200 rounded-2xl text-xs space-y-2">
+                    <p class="text-green-700 font-black uppercase text-center mb-2 tracking-widest">💰 Шилжүүлэг хийх данс</p>
+                    
+                    <div class="flex justify-between items-center border-b border-green-100 pb-2">
+                        <span class="text-gray-500">БАНК:</span>
+                        <span class="font-bold text-gray-800">ХААН БАНК</span>
+                    </div>
+
+                    <div class="flex justify-between items-center border-b border-green-100 pb-2">
+                        <span class="text-gray-500">НЭР:</span>
+                        <span class="font-bold text-gray-800">${bankData.name}</span>
+                    </div>
+
+                    <div class="flex justify-between items-center border-b border-green-100 pb-2">
+                        <span class="text-gray-500">IBAN:</span>
+                        <div class="flex items-center gap-2">
+                            <span class="font-bold text-gray-800">${bankData.iban}</span>
+                            <button onclick="copyToClipboard('${bankData.iban}', this)" class="bg-green-200 text-green-700 px-2 py-1 rounded-md text-[9px] font-black hover:bg-green-300 transition">ХУУЛАХ</button>
+                        </div>
+                    </div>
+
+                    <div class="flex justify-between items-center border-b border-green-100 pb-2">
+                        <span class="text-gray-500">ДАНС:</span>
+                        <div class="flex items-center gap-2">
+                            <span class="font-bold text-blue-800 text-sm tracking-widest">${bankData.acc}</span>
+                            <button onclick="copyToClipboard('${bankData.acc}', this)" class="bg-green-200 text-green-700 px-2 py-1 rounded-md text-[9px] font-black hover:bg-green-300 transition">ХУУЛАХ</button>
+                        </div>
+                    </div>
+
                     <p class="text-[10px] text-blue-600 pt-2 text-center leading-tight font-medium uppercase">УТГА: Гэрээний дугаар (№) бичнэ үү</p>
                 </div>
             `;
@@ -175,6 +198,24 @@
     } finally {
         btn.disabled = false;
         btn.innerText = "ХАРАХ";
+    }
+}
+        // Текст хуулж авах функц
+async function copyToClipboard(text, btnElement) {
+    try {
+        await navigator.clipboard.writeText(text.replace(/\s/g, '')); // Зайг нь арилгаж хуулна
+        const originalText = btnElement.innerText;
+        btnElement.innerText = "ХУУЛАГДЛАА!";
+        btnElement.classList.replace('bg-green-200', 'bg-blue-600');
+        btnElement.classList.replace('text-green-700', 'text-white');
+        
+        setTimeout(() => {
+            btnElement.innerText = originalText;
+            btnElement.classList.replace('bg-blue-600', 'bg-green-200');
+            btnElement.classList.replace('text-white', 'text-green-700');
+        }, 2000);
+    } catch (err) {
+        console.error('Хуулж чадсангүй: ', err);
     }
 }
     </script>
