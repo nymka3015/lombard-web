@@ -230,10 +230,28 @@
         }
 
         let deferredPrompt;
-        const installBtn = document.getElementById('install-btn');
-        if ('serviceWorker' in navigator) { navigator.serviceWorker.register('/sw.js'); }
-        window.addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); deferredPrompt = e; installBtn.classList.remove('hidden'); });
-        installBtn.addEventListener('click', async () => { if (deferredPrompt) { deferredPrompt.prompt(); deferredPrompt = null; } });
+const installBtn = document.getElementById('install-btn');
+
+// Вэб ачаалагдах үед товчийг харуулж болно (Сонголтоор)
+// installBtn.classList.remove('hidden'); 
+
+window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    installBtn.classList.remove('hidden'); // Бэлэн болмогц товчийг харуулна
+});
+
+installBtn.addEventListener('click', async () => {
+    if (deferredPrompt) {
+        deferredPrompt.prompt();
+        const { outcome } = await deferredPrompt.userChoice;
+        deferredPrompt = null;
+        if (outcome === 'accepted') installBtn.classList.add('hidden');
+    } else {
+        // Хэрэв Chrome суулгах цонхыг гаргахгүй байвал заавар харуулна
+        alert("Суулгахын тулд Chrome-ын баруун дээд талын 3 цэг дээр дараад 'Install app' эсвэл 'Add to Home screen' гэдгийг сонгоно уу.");
+    }
+});
     </script>
 </body>
 </html>
