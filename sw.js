@@ -1,10 +1,15 @@
-const CACHE_NAME = 'ogoozh-v4'; // v4 болгож солив
+const CACHE_NAME = 'ogoozh-v6';
 
 self.addEventListener('install', (event) => {
     self.skipWaiting();
-    console.log('V4 ажиллаж эхэллээ');
+    console.log('V6 суулгагдлаа');
 });
 
+self.addEventListener('activate', (event) => {
+    console.log('V6 идэвхжлээ');
+});
+
+// Энэ хэсэг заавал байх ёстой, хоосон байсан ч хамаагүй!
 self.addEventListener('fetch', (event) => {
-    // Хоосон
+    // Вэб ажиллаж байх үед өгөгдөл дамжуулахыг хянана
 });
