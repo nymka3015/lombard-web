@@ -1,7 +1,7 @@
 export default async function handler(req, res) {
     const { phone, pin } = req.query;
 
-    const USERS_FILE_ID = '1XgS_6oukQvuoG1gL7w5OxTrNlxXbg11w';
+    const USERS_FILE_ID = '1lCx52LDwuaZ8ARQP-V8ndzQhZjTXEOne';
     const CONFIG_FILE_ID = '1hcS_8-8qDv5w_-4wPG0RGk0IZH8mlijw';
     const SERVICES_FILE_ID = '10qCz9BvefhEvzXQsqarkFTgIG7YWy82m';
 
