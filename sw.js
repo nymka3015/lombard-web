@@ -1,9 +1,10 @@
-// v2 - Хувилбарыг өөрчлөх нь хөтөчийг шинэчлэлт хийхэд хүргэдэг
-self.addEventListener('install', (e) => {
-  self.skipWaiting(); 
-  console.log('Service Worker v2 installed');
+const CACHE_NAME = 'ogoozh-v3'; // Нэрийг нь v3 болгож солив
+
+self.addEventListener('install', (event) => {
+    self.skipWaiting();
+    console.log('Service Worker v3 installed');
 });
 
-self.addEventListener('fetch', (e) => {
-  // Хоосон байж болно
+self.addEventListener('fetch', (event) => {
+    // Вэб ажиллахад заавал байх ёстой хэсэг
 });
