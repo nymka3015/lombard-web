@@ -58,8 +58,8 @@
                 <button onclick="handleLogin()" id="login-btn" class="w-full gold-bg-block py-4 rounded-full font-black uppercase tracking-widest hover:brightness-110 transition active:scale-95 mt-6">
                     Нэвтрэх
                 </button>
-                <button id="install-btn" class="hidden w-full mt-2 text-[#D4AF37] text-[10px] font-bold uppercase tracking-widest py-2">
-                    📲 Апп суулгах
+                <button id="install-btn" class="w-full mt-4 bg-transparent border border-[#D4AF37]/50 text-[#D4AF37] py-3 rounded-full font-bold uppercase text-[10px] tracking-[0.2em] active:scale-95 transition">
+                    📲 ГАР УТАСАНД СУУЛГАХ
                 </button>
                 <p id="error-msg" class="text-red-500 text-xs text-center font-bold hidden">Мэдээлэл олдсонгүй!</p>
             </div>
@@ -230,28 +230,45 @@
         }
 
         let deferredPrompt;
-const installBtn = document.getElementById('install-btn');
+    const installBtn = document.getElementById('install-btn');
 
-// Вэб ачаалагдах үед товчийг харуулж болно (Сонголтоор)
-// installBtn.classList.remove('hidden'); 
-
-window.addEventListener('beforeinstallprompt', (e) => {
-    e.preventDefault();
-    deferredPrompt = e;
-    installBtn.classList.remove('hidden'); // Бэлэн болмогц товчийг харуулна
-});
-
-installBtn.addEventListener('click', async () => {
-    if (deferredPrompt) {
-        deferredPrompt.prompt();
-        const { outcome } = await deferredPrompt.userChoice;
-        deferredPrompt = null;
-        if (outcome === 'accepted') installBtn.classList.add('hidden');
-    } else {
-        // Хэрэв Chrome суулгах цонхыг гаргахгүй байвал заавар харуулна
-        alert("Суулгахын тулд Chrome-ын баруун дээд талын 3 цэг дээр дараад 'Install app' эсвэл 'Add to Home screen' гэдгийг сонгоно уу.");
+    // 1. Service Worker бүртгэх
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('/sw.js');
+        });
     }
-});
+
+    // 2. Android-ын Install Prompt-ыг барьж авах
+    window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
+        // Андройд дээр суулгах боломжтой бол товчны өнгийг илүү тод болгож болно
+        installBtn.classList.replace('text-[#D4AF37]', 'gold-bg-block'); 
+        installBtn.classList.remove('bg-transparent', 'border');
+    });
+
+    // 3. Товчлуур дарах үед
+    installBtn.addEventListener('click', async () => {
+        if (deferredPrompt) {
+            // Андройд системд суулгах цонхыг нь дуудаж гаргах
+            deferredPrompt.prompt();
+            const { outcome } = await deferredPrompt.userChoice;
+            if (outcome === 'accepted') {
+                installBtn.classList.add('hidden'); // Суулгачихвал товчийг нууна
+            }
+            deferredPrompt = null;
+        } else {
+            // Хэрэв шууд суулгах боломжгүй бол (iOS эсвэл Chrome бэлэн биш) заавар өгөх
+            const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+            
+            if (isIOS) {
+                alert("iPhone дээр суулгах заавар:\n\n1. Доор байх 'Share' (сумтай дөрвөлжин) товчийг дар.\n2. Гарч ирэх цэснээс 'Add to Home Screen' гэдгийг сонго.");
+            } else {
+                alert("Андройд дээр суулгах заавар:\n\n1. Хөтөчийн баруун дээд талын 3 цэг дээр дар.\n2. 'Install app' эсвэл 'Add to Home screen' гэдгийг сонго.");
+            }
+        }
+    });
     </script>
 </body>
 </html>
