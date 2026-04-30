@@ -1,10 +1,15 @@
 {
   "name": "Өгөөж Ломбард",
-  "short_name": "Өгөөж",
+  "short_name": "Өгөөж Ломбард",
+  "description": "Өгөөж ломбардын үйлчлүүлэгчдэд зориулсан тооцоо харах апп",
+  "lang": "mn",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
+  "orientation": "portrait",
   "background_color": "#050505",
   "theme_color": "#D4AF37",
+  "categories": ["finance"],
   "icons": [
     {
       "src": "icon.png",
@@ -17,6 +22,28 @@
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any"
+    },
+    {
+      "src": "icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Өгөөж Ломбард"
+    },
+    {
+      "src": "icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Өгөөж Ломбард"
     }
   ]
 }
