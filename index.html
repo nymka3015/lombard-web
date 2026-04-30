@@ -188,8 +188,14 @@
                         </div>
                     `;
 
-                    resultSection.innerHTML = loansHtml + summaryHtml + bankHtml + 
-                        '<button onclick="location.reload()" class="w-full text-slate-400 text-[10px] font-black uppercase py-10 tracking-[0.5em]">Системээс гарах</button>';
+                    resultSection.innerHTML = loansHtml + summaryHtml + bankHtml + `
+                <div class="pt-10 pb-6">
+                    <button onclick="location.reload()" class="w-full bg-slate-200 text-slate-600 py-4 rounded-2xl font-black uppercase text-[11px] tracking-[0.2em] hover:bg-slate-300 active:scale-95 transition-all shadow-sm flex items-center justify-center gap-2">
+                        <span>🚪</span> СИСТЕМЭЭС ГАРАХ
+                    </button>
+                </div>
+            `;
+
                     
                 } else {
                     document.getElementById('login-form').classList.add('hidden');
