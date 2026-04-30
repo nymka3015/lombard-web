@@ -53,7 +53,7 @@
                 <button id="install-btn" class="hidden w-full mt-2 text-slate-400 text-[10px] font-bold uppercase tracking-widest py-2 border border-slate-200 rounded-xl">
                     📲 Апп суулгах
                 </button>
-                <p id="error-msg" class="text-red-500 text-xs text-center font-bold hidden">Мэдээлэл олдсонгүй!</p>
+                <p id="error-msg" class="text-red-500 text-[11px] text-center font-bold hidden bg-red-50 p-3 rounded-xl mt-4 border border-red-100">Мэдээлэл олдсонгүй!</p>
             </div>
         </div>
 
@@ -68,6 +68,7 @@
             const btn = document.getElementById('login-btn');
             const error = document.getElementById('error-msg');
             const resultSection = document.getElementById('result-section');
+            const loginForm = document.getElementById('login-form');
 
             if(!phone || !pin) return;
             btn.disabled = true;
@@ -197,17 +198,37 @@
             `;
 
                     
-                } else {
-                    document.getElementById('login-form').classList.add('hidden');
-                    resultSection.classList.remove('hidden');
-                    resultSection.innerHTML = `<div class="text-center py-20 bg-white rounded-3xl shadow-sm"><h2 class="text-sm font-bold text-slate-400 uppercase">Идэвхтэй зээлгүй</h2><button onclick="location.reload()" class="mt-8 text-blue-600 text-[10px] font-black uppercase border border-blue-100 px-10 py-3 rounded-full">Буцах</button></div>`;
-                }
-            } catch (e) {
-                error.innerText = "Алдаа гарлаа."; error.classList.remove('hidden');
-            } finally {
-                btn.disabled = false; btn.innerText = "Нэвтрэх";
-            }
+                }    else if (response.status === 401) {
+            error.innerText = "Утас бүртгэлгүй эсвэл нууц код буруу байна!";
+            error.classList.remove('hidden');
+            // Нэвтрэх формыг нуухгүй, хэрэглэгчид алдааг нь харуулна.
+        } 
+        // 3. НЭВТЭРСЭН ГЭВЧ ИДЭВХТЭЙ ЗЭЭЛГҮЙ ҮЕД (404)
+        else if (response.status === 404) {
+            loginForm.classList.add('hidden');
+            resultSection.classList.remove('hidden');
+            resultSection.innerHTML = `
+                <div class="text-center py-20 bg-white rounded-3xl shadow-sm px-6">
+                    <h2 class="text-sm font-bold text-slate-400 uppercase">Танд идэвхтэй зээл байхгүй байна.</h2>
+                    <button onclick="location.reload()" class="mt-8 text-blue-600 text-[10px] font-black uppercase border border-blue-100 px-10 py-3 rounded-full">
+                        Буцах
+                    </button>
+                </div>`;
         }
+        // 4. БУСАД АЛДАА
+        else {
+            error.innerText = data.message || "Серверийн алдаа гарлаа.";
+            error.classList.remove('hidden');
+        }
+
+    } catch (e) {
+        error.innerText = "Интернет холболтоо шалгана уу.";
+        error.classList.remove('hidden');
+    } finally {
+        btn.disabled = false;
+        btn.innerText = "Нэвтрэх";
+    }
+}
 
         async function copyToClipboard(text, btnElement) {
             try {
