@@ -5,70 +5,60 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Өгөөж Ломбард</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;800&display=swap" rel="stylesheet">
     <link rel="manifest" href="/manifest.json">
     <link rel="apple-touch-icon" href="/icon.png">
     <style>
         body {
-            background-color: #050505;
+            background-color: #f1f5f9; /* Цайвар саарал дэвсгэр */
             font-family: 'Montserrat', sans-serif;
+            color: #1e293b;
+        }
+        .content-card {
+            background-color: #ffffff; /* Цагаан блок */
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+        }
+        .accent-blue {
+            color: #2563eb;
+        }
+        .btn-primary {
+            background-color: #1e293b;
             color: white;
-        }
-        /* Алтлаг текст (Хар дэвсгэр дээр) */
-        .gold-text {
-            color: #D4AF37;
-            background: linear-gradient(to right, #BF953F, #FCF6BA, #AA771C);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-        /* Алтлаг дэвсгэр + ХАР ТЕКСТ (Уншихад маш тодорхой) */
-        .gold-bg-block {
-            background: linear-gradient(to bottom, #FCF6BA, #BF953F, #AA771C);
-            color: #000000;
-            box-shadow: 0 4px 15px rgba(191, 149, 63, 0.4);
-        }
-        .card-bg {
-            background-color: #0f0f0f;
-            border: 1px solid #222;
-        }
-        .fancy-font {
-            font-family: 'Playfair Display', serif;
-        }
-        input::placeholder {
-            color: #444;
         }
     </style>
 </head>
 <body class="flex items-center justify-center min-h-screen p-4">
-    <div id="app" class="w-full max-w-md bg-[#080808] rounded-3xl shadow-[0_0_60px_rgba(191,149,63,0.15)] p-8 border border-white/5">
+    <div id="app" class="w-full max-w-md">
         
         <!-- Login Form -->
-        <div id="login-form">
+        <div id="login-form" class="content-card rounded-3xl p-8">
             <div class="text-center mb-10">
+                <!-- home.png зургийг 75% өргөнтэй, голлуулж харуулна -->
                 <img src="/home.png" alt="Өгөөж Ломбард" class="w-3/4 mx-auto h-auto object-contain">
             </div>
             
-            <div class="space-y-6">
+            <div class="space-y-5">
                 <div>
-                    <label class="text-[10px] font-bold text-white-500 uppercase tracking-widest ml-1">Утасны дугаар</label>
-                    <input id="phone" type="tel" class="w-full p-4 bg-black border-b-2 border-white/10 text-white focus:border-[#D4AF37] outline-none transition mt-1 font-bold" placeholder="99112233">
+                    <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Утасны дугаар</label>
+                    <input id="phone" type="tel" class="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl focus:border-blue-500 outline-none transition mt-1 font-bold" placeholder="99112233">
                 </div>
                 <div>
-                    <label class="text-[10px] font-bold text-white-500 uppercase tracking-widest ml-1">Нууц код</label>
-                    <input id="pin" type="password" maxlength="4" class="w-full p-4 bg-black border-b-2 border-white/10 text-white focus:border-[#D4AF37] outline-none transition mt-1 font-bold" placeholder="****">
+                    <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Нууц код</label>
+                    <input id="pin" type="password" maxlength="4" class="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl focus:border-blue-500 outline-none transition mt-1 font-bold" placeholder="****">
                 </div>
-                <button onclick="handleLogin()" id="login-btn" class="w-full gold-bg-block py-4 rounded-full font-black uppercase tracking-widest hover:brightness-110 transition active:scale-95 mt-6">
+                <button onclick="handleLogin()" id="login-btn" class="w-full btn-primary py-4 rounded-2xl font-black uppercase tracking-widest hover:bg-slate-800 transition active:scale-95 mt-4 shadow-lg">
                     Нэвтрэх
                 </button>
-                <button id="install-btn" class="hidden w-full mt-4 bg-transparent border border-[#D4AF37]/50 text-[#D4AF37] py-3 rounded-full font-bold uppercase text-[10px] tracking-[0.2em] active:scale-95 transition">
-                    📲 ГАР УТАСАНД СУУЛГАХ
+                <button id="install-btn" class="hidden w-full mt-2 text-slate-400 text-[10px] font-bold uppercase tracking-widest py-2 border border-slate-200 rounded-xl">
+                    📲 Апп суулгах
                 </button>
                 <p id="error-msg" class="text-red-500 text-xs text-center font-bold hidden">Мэдээлэл олдсонгүй!</p>
             </div>
         </div>
 
         <!-- Result Section -->
-        <div id="result-section" class="hidden"></div>
+        <div id="result-section" class="hidden space-y-4"></div>
     </div>
 
     <script>
@@ -93,63 +83,57 @@
                     resultSection.classList.remove('hidden');
 
                     let grandTotal = 0;
-                    let sumPrincipal = 0; // Нийт үндсэн зээл
-                    let sumInterest = 0;  // Нийт хүү
+                    let sumPrincipal = 0;
+                    let sumInterest = 0;
                     let sumN = 0, sumD = 0;
-                    
+
                     data.loans.forEach(loan => {
                         const loanTotal = (loan.amount + loan.totalInterest);
                         grandTotal += loanTotal;
                         sumPrincipal += loan.amount;
                         sumInterest += loan.totalInterest;
-                    
                         if (loan.nd === 'N') sumN += loanTotal;
                         if (loan.nd === 'D') sumD += loanTotal;
                     });
 
-                    // Зээлийн картууд
+                    // Зээлийн картууд (Цагаан дэвсгэр + Хар текст)
                     let loansHtml = data.loans.map(loan => `
-                        <div class="mb-6 p-6 gold-bg-block rounded-2xl relative overflow-hidden">
-                            <!-- Зээлийн толгой хэсэг -->
-                            <div class="flex justify-between items-start mb-6 border-b border-black/10 pb-4">
+                        <div class="p-6 content-card rounded-3xl relative overflow-hidden">
+                            <div class="flex justify-between items-start mb-6 border-b border-slate-100 pb-4">
                                 <div>
-                                    <h2 class="text-2xl font-black text-black uppercase fancy-font leading-none">${loan.name}</h2>
-                                    <p class="text-[10px] text-black/60 font-bold uppercase mt-1">Гэрийн №: ${loan.no}</p>
+                                    <h2 class="text-2xl font-extrabold text-slate-900 uppercase leading-none">${loan.name}</h2>
+                                    <p class="text-[10px] text-slate-400 font-bold uppercase mt-1">Гэрийн №: ${loan.no}</p>
                                 </div>
-                                <span class="text-[9px] font-black px-2 py-1 border border-black/20 text-black rounded uppercase">Идэвхтэй</span>
+                                <span class="text-[9px] font-black px-2 py-1 bg-green-100 text-green-700 rounded-lg uppercase">Идэвхтэй</span>
                             </div>
                             
-                            <!-- Зээлийн дэлгэрэнгүй мэдээлэл (Данс харагддаг шиг бүтэц) -->
                             <div class="space-y-3 text-[11px] font-bold">
-                                <div class="flex justify-between border-b border-black/10 pb-2 text-black/70">
+                                <div class="flex justify-between border-b border-slate-50 pb-2 text-slate-500">
                                     <span>ЗЭЭЛИЙН ДҮН:</span>
-                                    <span class="text-black font-black">${loan.amount.toLocaleString()}₮</span>
+                                    <span class="text-slate-900 font-extrabold">${loan.amount.toLocaleString()}₮</span>
                                 </div>
-                                <div class="flex justify-between border-b border-black/10 pb-2 text-black/70">
+                                <div class="flex justify-between border-b border-slate-50 pb-2 text-slate-500">
                                     <span>СҮҮЛД ТӨЛСӨН:</span>
-                                    <span class="text-black font-black">${loan.lastPayment}</span>
+                                    <span class="text-slate-900">${loan.lastPayment}</span>
                                 </div>
-                                <div class="flex justify-between border-b border-black/10 pb-2 text-black/70">
+                                <div class="flex justify-between border-b border-slate-50 pb-2 text-slate-500">
                                     <span>ХУГАЦАА:</span>
-                                    <span class="text-black font-black">${loan.normalDays} хоног</span>
+                                    <span class="text-slate-900">${loan.normalDays} хоног</span>
                                 </div>
-                                
                                 ${loan.overdueDays > 0 ? `
-                                <div class="flex justify-between border-b border-black/10 pb-2 text-red-800">
+                                <div class="flex justify-between border-b border-slate-50 pb-2 text-red-600">
                                     <span>ХУГАЦАА ХЭТЭРСЭН:</span>
-                                    <span class="font-black">${loan.overdueDays} хоног</span>
+                                    <span class="font-extrabold">${loan.overdueDays} хоног</span>
                                 </div>
                                 ` : ''}
-                                
-                                <div class="flex justify-between border-b border-black/10 pb-2 text-black/70">
+                                <div class="flex justify-between border-b border-slate-50 pb-2 text-slate-500">
                                     <span>ХҮҮ :</span>
-                                    <span class="text-black font-black">${loan.totalInterest.toLocaleString()}₮</span>
+                                    <span class="text-blue-600 font-extrabold">${loan.totalInterest.toLocaleString()}₮</span>
                                 </div>
-                    
-                                <!-- ТӨЛӨХ ДҮН: Голлуулсан хар блок -->
-                                <div class="bg-black text-white p-5 rounded-xl mt-5 shadow-lg text-center">
-                                    <p class="text-[10px] uppercase font-black mb-1 opacity-50 tracking-widest">Төлөх дүн</p>
-                                    <h3 class="text-3xl font-black text-[#FCF6BA] tracking-tighter">
+
+                                <div class="bg-slate-900 text-white p-5 rounded-2xl mt-5 text-center shadow-lg">
+                                    <p class="text-[10px] uppercase font-bold mb-1 opacity-50 tracking-widest">Төлөх дүн</p>
+                                    <h3 class="text-3xl font-black text-white tracking-tighter">
                                         ${(loan.amount + loan.totalInterest).toLocaleString()}₮
                                     </h3>
                                 </div>
@@ -157,73 +141,60 @@
                         </div>
                     `).join('');
 
-                    // НИЙТ ДҮН: Алтлаг дэвсгэр дээр Хар текст
-                                    let summaryHtml = (data.loans.length > 1) ? `
-                    <div class="mb-8 p-6 gold-bg-block rounded-3xl shadow-2xl space-y-2">
-                        <p class="text-[10px] uppercase font-black mb-3 opacity-70 text-center border-b border-black/10 pb-2">БҮХ ЗЭЭЛИЙН НИЙТ ТӨЛБӨР</p>
-                        
-                        <div class="flex justify-between text-xs font-bold px-2">
-                            <span class="opacity-70">Нийт зээл:</span>
-                            <span>${sumPrincipal.toLocaleString()}₮</span>
+                    // НИЙТ ДҮН (Цагаан блок)
+                    let summaryHtml = (data.loans.length > 1) ? `
+                        <div class="p-6 content-card rounded-3xl space-y-2">
+                            <p class="text-[10px] uppercase font-black mb-3 text-slate-400 text-center border-b border-slate-100 pb-2">БҮХ ЗЭЭЛИЙН НИЙТ ТӨЛБӨР</p>
+                            <div class="flex justify-between text-xs font-bold text-slate-500 px-2">
+                                <span>Нийт зээл:</span>
+                                <span>${sumPrincipal.toLocaleString()}₮</span>
+                            </div>
+                            <div class="flex justify-between text-xs font-bold text-slate-500 px-2">
+                                <span>Нийт хүү:</span>
+                                <span>${sumInterest.toLocaleString()}₮</span>
+                            </div>
+                            <div class="flex justify-between text-base font-black text-slate-900 px-2 pt-2 border-t border-slate-100 mt-2">
+                                <span>НИЙТ ТӨЛӨЛТ:</span>
+                                <span class="text-xl">${grandTotal.toLocaleString()}₮</span>
+                            </div>
                         </div>
-                        
-                        <div class="flex justify-between text-xs font-bold px-2">
-                            <span class="opacity-70">Нийт хүү:</span>
-                            <span>${sumInterest.toLocaleString()}₮</span>
-                        </div>
-                        
-                        <div class="flex justify-between text-base font-black px-2 pt-2 border-t border-black/10 mt-2">
-                            <span>НИЙТ ТӨЛӨЛТ:</span>
-                            <span class="text-xl">${grandTotal.toLocaleString()}₮</span>
-                        </div>
-                    </div>
-                ` : "";
+                    ` : "";
 
                     const bankData = (sumD >= sumN) ? { name: "Ц.Дамдинжав", iban: "79 000 500", acc: "53 0776 0208" } : { name: "Д.Нямжанцан", iban: "39 000 500", acc: "54 0330 6898" };
 
-                    // ДАНСНЫ ХЭСЭГ: Алтлаг дэвсгэр дээр Хар текст
+                    // ДАНС (Цагаан блок + Цэнхэр өнгө)
                     let bankHtml = `
-                    <div class="mt-8 p-4 sm:p-6 gold-bg-block rounded-2xl relative overflow-hidden">
-                        <p class="font-black uppercase text-center mb-5 tracking-tighter">Шилжүүлэг хийх данс</p>
-                        <div class="space-y-3 text-[11px] font-bold">
-                            <div class="flex justify-between border-b border-black/10 pb-2">
-                                <span class="opacity-70 flex-shrink-0">БАНК:</span>
-                                <span class="text-right ml-2">ХААН БАНК</span>
-                            </div>
-                            <div class="flex justify-between border-b border-black/10 pb-2">
-                                <span class="opacity-70 flex-shrink-0">НЭР:</span>
-                                <span class="text-right ml-2">${bankData.name}</span>
-                            </div>
-                            
-                            <!-- IBAN хэсэг: Мөр шилжихгүй -->
-                            <div class="flex justify-between items-center border-b border-black/10 pb-2 gap-1">
-                                <span class="opacity-70 flex-shrink-0">IBAN:</span>
-                                <div class="flex items-center gap-1 whitespace-nowrap">
-                                    <span class="tracking-tighter font-black">${bankData.iban}</span>
-                                    <button onclick="copyToClipboard('${bankData.iban}', this)" class="bg-black/10 px-2 py-0.5 rounded text-[8px] font-black flex-shrink-0 uppercase">Хуулах</button>
+                        <div class="p-6 content-card rounded-3xl relative overflow-hidden">
+                            <p class="font-black uppercase text-center mb-5 text-slate-400 text-[10px] tracking-widest">Шилжүүлэг хийх данс</p>
+                            <div class="space-y-4 text-[11px] font-bold">
+                                <div class="flex justify-between border-b border-slate-50 pb-2 text-slate-500"><span>БАНК:</span><span class="text-slate-900">ХААН БАНК</span></div>
+                                <div class="flex justify-between border-b border-slate-50 pb-2 text-slate-500"><span>НЭР:</span><span class="text-slate-900">${bankData.name}</span></div>
+                                <div class="flex justify-between items-center border-b border-slate-50 pb-2 gap-1">
+                                    <span class="text-slate-500 flex-shrink-0">IBAN:</span>
+                                    <div class="flex items-center gap-2 whitespace-nowrap">
+                                        <span class="text-slate-900">${bankData.iban}</span>
+                                        <button onclick="copyToClipboard('${bankData.iban}', this)" class="bg-slate-100 text-slate-600 px-2 py-1 rounded text-[8px] font-black uppercase">Хуулах</button>
+                                    </div>
+                                </div>
+                                <div class="flex justify-between items-center pt-1 gap-1">
+                                    <span class="text-slate-500 flex-shrink-0">ДАНС:</span>
+                                    <div class="flex items-center gap-2 whitespace-nowrap">
+                                        <span class="text-2xl font-black text-blue-600 tracking-tighter">${bankData.acc}</span>
+                                        <button onclick="copyToClipboard('${bankData.acc}', this)" class="bg-blue-600 text-white px-3 py-1.5 rounded-xl text-[9px] font-black uppercase shadow-md shadow-blue-200">Хуулах</button>
+                                    </div>
                                 </div>
                             </div>
-                
-                            <!-- ДАНС хэсэг: Дэлгэцнээс хамаарч хэмжээ нь өөрчлөгдөнө -->
-                            <div class="flex justify-between items-center pt-1 gap-1">
-                                <span class="opacity-70 flex-shrink-0">ДАНС:</span>
-                                <div class="flex items-center gap-2 whitespace-nowrap">
-                                    <span class="text-xl sm:text-2xl font-black tracking-tighter">${bankData.acc}</span>
-                                    <button onclick="copyToClipboard('${bankData.acc}', this)" class="bg-black text-white px-2 py-1.5 rounded-lg text-[9px] font-black uppercase flex-shrink-0">Хуулах</button>
-                                </div>
-                            </div>
+                            <p class="text-[9px] text-blue-500 pt-5 text-center font-bold uppercase">УТГА: Гэрээний дугаар (№) бичнэ үү</p>
                         </div>
-                        <p class="text-[9px] text-black/60 pt-5 text-center italic font-bold uppercase">УТГА: Гэрээний дугаар (№) бичнэ үү</p>
-                    </div>
-                `;
+                    `;
 
                     resultSection.innerHTML = loansHtml + summaryHtml + bankHtml + 
-                        '<button onclick="location.reload()" class="w-full text-white-700 text-[10px] font-black uppercase py-10 tracking-[0.5em]">Системээс гарах</button>';
+                        '<button onclick="location.reload()" class="w-full text-slate-400 text-[10px] font-black uppercase py-10 tracking-[0.5em]">Системээс гарах</button>';
                     
                 } else {
                     document.getElementById('login-form').classList.add('hidden');
                     resultSection.classList.remove('hidden');
-                    resultSection.innerHTML = `<div class="text-center py-20"><h2 class="text-lg font-bold text-white-600 uppercase">Идэвхтэй зээлгүй</h2><button onclick="location.reload()" class="mt-8 gold-text text-[10px] font-black uppercase py-3 rounded-full">Буцах</button></div>`;
+                    resultSection.innerHTML = `<div class="text-center py-20 bg-white rounded-3xl shadow-sm"><h2 class="text-sm font-bold text-slate-400 uppercase">Идэвхтэй зээлгүй</h2><button onclick="location.reload()" class="mt-8 text-blue-600 text-[10px] font-black uppercase border border-blue-100 px-10 py-3 rounded-full">Буцах</button></div>`;
                 }
             } catch (e) {
                 error.innerText = "Алдаа гарлаа."; error.classList.remove('hidden');
@@ -236,37 +207,19 @@
             try {
                 await navigator.clipboard.writeText(text.replace(/\s/g, ''));
                 const originalText = btnElement.innerText;
-                btnElement.innerText = "ОК!";
+                btnElement.innerText = "OK!";
                 setTimeout(() => { btnElement.innerText = originalText; }, 2000);
             } catch (err) { console.error(err); }
         }
 
-       if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('/sw.js?v=6')
-            .then(() => console.log("SW Бүртгэгдсэн"))
-            .catch(err => console.log("SW Алдаа", err));
-    }
-
-    let deferredPrompt;
-    const installBtn = document.getElementById('install-btn');
-
-    window.addEventListener('beforeinstallprompt', (e) => {
-        e.preventDefault();
-        deferredPrompt = e;
-        installBtn.classList.remove('hidden');
-        installBtn.style.background = 'linear-gradient(to bottom, #FCF6BA, #BF953F, #AA771C)';
-        installBtn.style.color = 'black';
-        console.log('Систем: Суулгахад бэлэн!');
-    });
-
-    installBtn.addEventListener('click', async () => {
-        if (deferredPrompt) {
-            deferredPrompt.prompt();
-            const { outcome } = await deferredPrompt.userChoice;
-            deferredPrompt = null;
-            if (outcome === 'accepted') installBtn.classList.add('hidden');
-        }
-    });
+        let deferredPrompt;
+        const installBtn = document.getElementById('install-btn');
+        if ('serviceWorker' in navigator) { navigator.serviceWorker.register('/sw.js?v=7'); }
+        window.addEventListener('beforeinstallprompt', (e) => { 
+            e.preventDefault(); deferredPrompt = e; 
+            installBtn.classList.remove('hidden'); 
+        });
+        installBtn.addEventListener('click', async () => { if (deferredPrompt) { deferredPrompt.prompt(); deferredPrompt = null; } });
     </script>
 </body>
 </html>
