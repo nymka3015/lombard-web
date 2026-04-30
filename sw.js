@@ -1,10 +1,10 @@
-const CACHE_NAME = 'ogoozh-v3'; // Нэрийг нь v3 болгож солив
+const CACHE_NAME = 'ogoozh-v4'; // v4 болгож солив
 
 self.addEventListener('install', (event) => {
     self.skipWaiting();
-    console.log('Service Worker v3 installed');
+    console.log('V4 ажиллаж эхэллээ');
 });
 
 self.addEventListener('fetch', (event) => {
-    // Вэб ажиллахад заавал байх ёстой хэсэг
+    // Хоосон
 });
