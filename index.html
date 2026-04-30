@@ -229,47 +229,32 @@
             } catch (err) { console.error(err); }
         }
 
-        let deferredPrompt;
-    const installBtn = document.getElementById('install-btn');
-
-    // 1. Service Worker-ийг маш найдвартай бүртгэх
-    if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-            navigator.serviceWorker.register('/sw.js?v=4') // Хувилбар нэмж кэш цэвэрлэв
-            .then(reg => console.log('SW OK'))
-            .catch(err => console.log('SW Error', err));
-        });
+       if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('/sw.js?v=6')
+            .then(() => console.log("SW Бүртгэгдсэн"))
+            .catch(err => console.log("SW Алдаа", err));
     }
 
-    // 2. ЗӨВХӨН СУУЛГАХ БОЛОМЖТОЙ ҮЕД ТОВЧИЙГ ХАРУУЛАХ
+    let deferredPrompt;
+    const installBtn = document.getElementById('install-btn');
+
     window.addEventListener('beforeinstallprompt', (e) => {
-        console.log('Систем: Апп суулгахад бэлэн боллоо!');
         e.preventDefault();
         deferredPrompt = e;
-        
-        // Нууц байсан товчийг ил гаргах
         installBtn.classList.remove('hidden');
-        // Загварыг нь алтлаг болгох
-        installBtn.classList.add('gold-bg-block');
-        installBtn.classList.remove('bg-transparent', 'text-[#D4AF37]');
+        installBtn.style.background = 'linear-gradient(to bottom, #FCF6BA, #BF953F, #AA771C)';
         installBtn.style.color = 'black';
+        console.log('Систем: Суулгахад бэлэн!');
     });
 
     installBtn.addEventListener('click', async () => {
         if (deferredPrompt) {
             deferredPrompt.prompt();
             const { outcome } = await deferredPrompt.userChoice;
-            if (outcome === 'accepted') {
-                installBtn.classList.add('hidden');
-            }
             deferredPrompt = null;
+            if (outcome === 'accepted') installBtn.classList.add('hidden');
         }
     });
-
-    // Аль хэдийн суусан бол нуух
-    if (window.matchMedia('(display-mode: standalone)').matches) {
-        installBtn.classList.add('hidden');
-    }
     </script>
 </body>
 </html>
