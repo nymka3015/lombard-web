@@ -142,7 +142,7 @@
                                 ` : ''}
                                 
                                 <div class="flex justify-between border-b border-black/10 pb-2 text-black/70">
-                                    <span>ХҮҮ + ТОРГУУЛЬ:</span>
+                                    <span>ХҮҮ :</span>
                                     <span class="text-black font-black">${loan.totalInterest.toLocaleString()}₮</span>
                                 </div>
                     
@@ -183,29 +183,39 @@
 
                     // ДАНСНЫ ХЭСЭГ: Алтлаг дэвсгэр дээр Хар текст
                     let bankHtml = `
-                        <div class="mt-8 p-6 gold-bg-block rounded-2xl relative overflow-hidden">
-                            <p class="font-black uppercase text-center mb-5 tracking-tighter">Шилжүүлэг хийх данс</p>
-                            <div class="space-y-3 text-[11px] font-bold">
-                                <div class="flex justify-between border-b border-black/10 pb-2"><span>БАНК:</span><span>ХААН БАНК</span></div>
-                                <div class="flex justify-between border-b border-black/10 pb-2"><span>НЭР:</span><span>${bankData.name}</span></div>
-                                <div class="flex justify-between border-b border-black/10 pb-2">
-                                    <span>IBAN:</span>
-                                    <div class="flex items-center gap-2">
-                                        <span>${bankData.iban}</span>
-                                        <button onclick="copyToClipboard('${bankData.iban}', this)" class="bg-black/10 px-2 py-0.5 rounded text-[8px] font-black">ХУУЛАХ</button>
-                                    </div>
-                                </div>
-                                <div class="flex justify-between items-center pt-2">
-                                    <span>ДАНС:</span>
-                                    <div class="flex items-center gap-3">
-                                        <span class="text-2xl font-black tracking-tighter">${bankData.acc}</span>
-                                        <button onclick="copyToClipboard('${bankData.acc}', this)" class="bg-black text-white px-3 py-1.5 rounded-lg text-[9px] font-black uppercase">Хуулах</button>
-                                    </div>
+                    <div class="mt-8 p-4 sm:p-6 gold-bg-block rounded-2xl relative overflow-hidden">
+                        <p class="font-black uppercase text-center mb-5 tracking-tighter">Шилжүүлэг хийх данс</p>
+                        <div class="space-y-3 text-[11px] font-bold">
+                            <div class="flex justify-between border-b border-black/10 pb-2">
+                                <span class="opacity-70 flex-shrink-0">БАНК:</span>
+                                <span class="text-right ml-2">ХААН БАНК</span>
+                            </div>
+                            <div class="flex justify-between border-b border-black/10 pb-2">
+                                <span class="opacity-70 flex-shrink-0">НЭР:</span>
+                                <span class="text-right ml-2">${bankData.name}</span>
+                            </div>
+                            
+                            <!-- IBAN хэсэг: Мөр шилжихгүй -->
+                            <div class="flex justify-between items-center border-b border-black/10 pb-2 gap-1">
+                                <span class="opacity-70 flex-shrink-0">IBAN:</span>
+                                <div class="flex items-center gap-1 whitespace-nowrap">
+                                    <span class="tracking-tighter font-black">${bankData.iban}</span>
+                                    <button onclick="copyToClipboard('${bankData.iban}', this)" class="bg-black/10 px-2 py-0.5 rounded text-[8px] font-black flex-shrink-0 uppercase">Хуулах</button>
                                 </div>
                             </div>
-                            <p class="text-[9px] text-black/60 pt-5 text-center italic font-bold uppercase">УТГА: Гэрээний дугаар (№) бичнэ үү</p>
+                
+                            <!-- ДАНС хэсэг: Дэлгэцнээс хамаарч хэмжээ нь өөрчлөгдөнө -->
+                            <div class="flex justify-between items-center pt-1 gap-1">
+                                <span class="opacity-70 flex-shrink-0">ДАНС:</span>
+                                <div class="flex items-center gap-2 whitespace-nowrap">
+                                    <span class="text-xl sm:text-2xl font-black tracking-tighter">${bankData.acc}</span>
+                                    <button onclick="copyToClipboard('${bankData.acc}', this)" class="bg-black text-white px-2 py-1.5 rounded-lg text-[9px] font-black uppercase flex-shrink-0">Хуулах</button>
+                                </div>
+                            </div>
                         </div>
-                    `;
+                        <p class="text-[9px] text-black/60 pt-5 text-center italic font-bold uppercase">УТГА: Гэрээний дугаар (№) бичнэ үү</p>
+                    </div>
+                `;
 
                     resultSection.innerHTML = loansHtml + summaryHtml + bankHtml + 
                         '<button onclick="location.reload()" class="w-full text-white-700 text-[10px] font-black uppercase py-10 tracking-[0.5em]">Системээс гарах</button>';
