@@ -62,8 +62,15 @@ export default async function handler(req, res) {
             });
 
             const remainingAmount = originalAmount - totalDiscount;
-            const today = new Date(); today.setHours(0,0,0,0);
-            const start = new Date(latestPaymentDate); start.setHours(0,0,0,0);
+
+            // --- МОНГОЛ ЦАГААР ТОХИРУУЛАХ ХЭСЭГ ---
+            const mngTime = new Date().toLocaleString("en-US", {timeZone: "Asia/Ulaanbaatar"});
+            const today = new Date(mngTime); 
+            today.setHours(0, 0, 0, 0); 
+            // ------------------------------------
+
+            const start = new Date(latestPaymentDate); 
+            start.setHours(0, 0, 0, 0);
             
             const diffTime = today - start;
             const diffDays = Math.max(0, Math.floor(diffTime / (1000 * 60 * 60 * 24)));
