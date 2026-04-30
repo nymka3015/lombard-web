@@ -269,6 +269,9 @@
             }
         }
     });
+        if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true) {
+        installBtn.classList.add('hidden');
+    }
     </script>
 </body>
 </html>
